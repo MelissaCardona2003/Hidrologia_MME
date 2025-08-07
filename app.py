@@ -1,13 +1,15 @@
 import dash
-
 from dash import dcc, html, Input, Output, State, dash_table
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
 import datetime as dt
 from datetime import date, timedelta
+import warnings
 import sys
 import os
+import time
+import traceback
 sys.path.append(os.path.join(os.path.dirname(__file__), 'API_XM'))
 import importlib.util
 pydataxm_path = os.path.join(os.path.dirname(__file__), 'API_XM', 'pydataxm', 'pydataxm.py')
@@ -21,11 +23,100 @@ warnings.filterwarnings("ignore")
 # Inicializar la aplicación Dash con tema Bootstrap
 
 # --- NUEVO: Fecha/hora de última actualización del código ---
-import time
 LAST_UPDATE = time.strftime('%Y-%m-%d %H:%M:%S')
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP])
-app.title = " Caudal y capacidad util - XM"
+# Inicializar la aplicación Dash con tema Bootstrap y estilos personalizados
+app = dash.Dash(__name__, 
+                external_stylesheets=[
+                    dbc.themes.BOOTSTRAP, 
+                    dbc.icons.BOOTSTRAP,
+                    "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+                ])
+
+# Custom CSS para mejorar la apariencia
+app.index_string = '''
+<!DOCTYPE html>
+<html>
+    <head>
+        {%metas%}
+        <title>{%title%}</title>
+        {%favicon%}
+        {%css%}
+        <style>
+            body {
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+            }
+            .main-container {
+                backdrop-filter: blur(20px);
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                margin: 20px;
+                padding: 30px;
+                animation: fadeIn 0.8s ease-out;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(30px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .header-gradient {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                font-weight: 700;
+            }
+            .card-modern {
+                border: none;
+                border-radius: 16px;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                backdrop-filter: blur(10px);
+            }
+            .card-modern:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 16px 48px rgba(0,0,0,0.15);
+            }
+            .btn-modern {
+                border-radius: 12px;
+                font-weight: 500;
+                padding: 12px 24px;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            }
+            .btn-modern:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            }
+            .form-control-modern {
+                border: 2px solid #e1e8ed;
+                border-radius: 12px;
+                padding: 12px 16px;
+                transition: all 0.3s ease;
+                background: rgba(255,255,255,0.8);
+                backdrop-filter: blur(10px);
+            }
+            .form-control-modern:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+                background: rgba(255,255,255,0.95);
+            }
+        </style>
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>
+'''
+
+app.title = "⚡ Dashboard Hidrológico MME - Energía Colombia"
 
 # Inicializar API XM
 import traceback
@@ -100,112 +191,161 @@ rios = get_rio_options()
 
 
 
-# Layout minimalista tipo pizarra para caudal
-app.layout = dbc.Container([
-    dbc.Row([
-        dbc.Col([
-            html.Div([
-                html.Span(
-                    [
-                        html.I(className="bi bi-lightning-charge-fill", style={"color": "#007bff", "fontSize": "2.2rem", "verticalAlign": "middle", "marginRight": "0.5rem"}),
-                        html.Span("Tablero Hidrológico del MME", style={"fontWeight": "bold", "fontSize": "2.1rem", "color": "#1565c0", "verticalAlign": "middle", "letterSpacing": "-1px"})
-                    ],
-                    style={"display": "inline-flex", "alignItems": "center"}
-                ),
-                html.Br(),
-                html.Span(
-                    "Datos aportados por XM - Sistema de Información Hidrológica de Colombia",
-                    style={"fontSize": "1.1rem", "color": "#555", "fontWeight": 400}
-                ),
-                html.Br(),
-                # --- NUEVO: Mostrar fecha/hora de última actualización ---
-                html.Span(
-                    f"Última actualización: {LAST_UPDATE}",
-                    style={"fontSize": "0.95rem", "color": "#888", "fontStyle": "italic"}
-                )
-            ], className="text-center mb-2 mt-2"),
-            html.Hr(style={"marginTop": "0.5rem", "marginBottom": "1.5rem"})
-        ], width=12)
-    ]),
-    dbc.Row([
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    dbc.Row([
-                        dbc.Col([
-                            html.Label("Región", className="fw-bold mb-1"),
-                            dcc.Dropdown(
-                                id="region-dropdown",
-                                options=[{"label": r, "value": r} for r in regiones],
-                                placeholder="Selecciona una región...",
-                                className="mb-0"
-                            )
-                        ], md=3, xs=12),
-                        dbc.Col([
-                            html.Label("Nombre del Río", className="fw-bold mb-1"),
-                            dcc.Dropdown(
-                                id="rio-dropdown",
-                                options=[{"label": r, "value": r} for r in rios],
-                                placeholder="Selecciona un río...",
-                                className="mb-0"
-                            )
-                        ], md=3, xs=12),
-                        dbc.Col([
-                            html.Label("Fecha Inicio", className="fw-bold mb-1"),
-                            dcc.DatePickerSingle(
-                                id="start-date",
-                                date=date.today() - timedelta(days=30),
-                                display_format="YYYY-MM-DD",
-                                className="mb-0"
-                            )
-                        ], md=2, xs=12),
-                        dbc.Col([
-                            html.Label("Fecha Fin", className="fw-bold mb-1"),
-                            dcc.DatePickerSingle(
-                                id="end-date",
-                                date=date.today(),
-                                display_format="YYYY-MM-DD",
-                                className="mb-0"
-                            )
-                        ], md=2, xs=12),
-                        dbc.Col([
-                            html.Label("\u00A0"),  # Espacio
-                            dbc.Button(
-                                [html.I(className="bi bi-search me-2"), "Consultar"],
+# Layout moderno y responsive para el dashboard
+app.layout = html.Div([
+    # Container principal con clase CSS personalizada
+    dbc.Container([
+        # Header moderno con gradiente
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    html.Div([
+                        html.I(className="bi bi-lightning-charge-fill me-3", 
+                               style={"fontSize": "3.5rem", "color": "#667eea"}),
+                        html.Div([
+                            html.H1("Dashboard Hidrológico del MME", 
+                                   className="header-gradient mb-1",
+                                   style={"fontSize": "2.5rem", "fontWeight": "700"}),
+                            html.P("Sistema de Información Hidrológica de Colombia - Datos XM",
+                                  className="text-muted mb-2",
+                                  style={"fontSize": "1.2rem", "fontWeight": "400"}),
+                            dbc.Badge([
+                                html.I(className="bi bi-clock me-1"),
+                                f"Última actualización: {LAST_UPDATE}"
+                            ], color="info", className="px-3 py-1")
+                        ])
+                    ], className="d-flex align-items-center mb-4")
+                ])
+            ], width=12)
+        ], className="mb-4"),
+
+        # Panel de controles moderno
+        dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody([
+                        html.Div([
+                            html.I(className="bi bi-sliders me-2", style={"color": "#667eea"}),
+                            html.Strong("Panel de Control", style={"fontSize": "1.1rem"})
+                        ], className="mb-3 d-flex align-items-center"),
+                        
+                        dbc.Row([
+                            dbc.Col([
+                                html.Label([
+                                    html.I(className="bi bi-geo-alt me-2"),
+                                    "Región Hidrológica"
+                                ], className="fw-bold mb-2 d-flex align-items-center"),
+                                dcc.Dropdown(
+                                    id="region-dropdown",
+                                    options=[{"label": "🌎 Todas las regiones", "value": "__ALL_REGIONS__"}] + 
+                                           [{"label": f"📍 {r}", "value": r} for r in regiones],
+                                    placeholder="Selecciona una región...",
+                                    className="form-control-modern mb-0",
+                                    style={"fontSize": "0.95rem"}
+                                )
+                            ], lg=3, md=6, sm=12),
+                            
+                            dbc.Col([
+                                html.Label([
+                                    html.I(className="bi bi-water me-2"),
+                                    "Río Específico"
+                                ], className="fw-bold mb-2 d-flex align-items-center"),
+                                dcc.Dropdown(
+                                    id="rio-dropdown",
+                                    options=[{"label": f"🌊 {r}", "value": r} for r in rios],
+                                    placeholder="Selecciona un río...",
+                                    className="form-control-modern mb-0",
+                                    style={"fontSize": "0.95rem"}
+                                )
+                            ], lg=3, md=6, sm=12),
+                            
+                            dbc.Col([
+                                html.Label([
+                                    html.I(className="bi bi-calendar-date me-2"),
+                                    "Fecha Inicio"
+                                ], className="fw-bold mb-2 d-flex align-items-center"),
+                                dcc.DatePickerSingle(
+                                    id="start-date",
+                                    date=date.today() - timedelta(days=30),
+                                    display_format="DD/MM/YYYY",
+                                    className="form-control-modern",
+                                    style={"width": "100%"}
+                                )
+                            ], lg=2, md=6, sm=12),
+                            
+                            dbc.Col([
+                                html.Label([
+                                    html.I(className="bi bi-calendar-check me-2"),
+                                    "Fecha Final"
+                                ], className="fw-bold mb-2 d-flex align-items-center"),
+                                dcc.DatePickerSingle(
+                                    id="end-date",
+                                    date=date.today(),
+                                    display_format="DD/MM/YYYY",
+                                    className="form-control-modern",
+                                    style={"width": "100%"}
+                                )
+                            ], lg=2, md=6, sm=12),
+                            
+                            dbc.Col([
+                                html.Label("\u00A0", className="d-block"),
+                                dbc.Button([
+                                    html.I(className="bi bi-search me-2"),
+                                    "Analizar Datos"
+                                ],
                                 id="query-button",
                                 color="primary",
-                                className="w-100",
-                                style={"marginTop": "0.5rem"}
-                            )
-                        ], md=2, xs=12)
-                    ], className="g-2 align-items-end justify-content-center")
-                ])
-            ], className="shadow-sm border-0", style={"background": "#fff", "borderRadius": "1rem", "padding": "0.5rem 1rem"})
-        ], width=11, className="mx-auto mb-4")
-    ]),
-    dbc.Row([
-        dbc.Col([
-            dcc.Loading(
-                id="loading-indicator",
-                children=[html.Div(id="tab-content")],
-                type="default"
-            )
-        ], width=12)
-    ]),
-    # Sección para mostrar ríos únicos
-    dbc.Row([
-        dbc.Col([
-            html.Hr(),
-            dbc.Button(
-                [html.I(className="bi bi-list-ul me-2"), "Mostrar todos los ríos de la API"],
-                id="show-rios-btn",
-                color="secondary",
-                className="mb-2"
-            ),
-            html.Div(id="rios-list-output")
-        ], width=12)
-    ])
-], fluid=True, className="px-2 px-md-5", style={"background": "#f6f6f6", "minHeight": "100vh"})
+                                className="w-100 btn-modern",
+                                style={"marginTop": "0.5rem", "background": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", "border": "none"}
+                                )
+                            ], lg=2, md=12, sm=12)
+                        ], className="g-3 align-items-end")
+                    ], className="p-4")
+                ], className="card-modern shadow-lg")
+            ], width=12)
+        ], className="mb-4"),
+
+        # Área de contenido con loading moderno
+        dbc.Row([
+            dbc.Col([
+                dcc.Loading(
+                    id="loading-indicator",
+                    children=[html.Div(id="tab-content")],
+                    type="dot",
+                    color="#667eea",
+                    className="loading-spinner"
+                )
+            ], width=12)
+        ], className="mb-4"),
+
+        # Sección adicional para análisis de ríos
+        dbc.Row([
+            dbc.Col([
+                html.Hr(style={"margin": "2rem 0", "border": "2px solid #e1e8ed", "borderRadius": "2px"}),
+                dbc.Card([
+                    dbc.CardBody([
+                        html.Div([
+                            html.I(className="bi bi-database me-2", style={"color": "#667eea"}),
+                            html.Strong("Explorador de Datos", style={"fontSize": "1.1rem"})
+                        ], className="mb-3 d-flex align-items-center"),
+                        
+                        dbc.Button([
+                            html.I(className="bi bi-list-ul me-2"),
+                            "Ver Inventario Completo de Ríos"
+                        ],
+                        id="show-rios-btn",
+                        color="secondary",
+                        outline=True,
+                        className="btn-modern mb-3",
+                        style={"border": "2px solid #6c757d"}
+                        ),
+                        html.Div(id="rios-list-output")
+                    ], className="p-3")
+                ], className="card-modern")
+            ], width=12)
+        ])
+    ], className="main-container", fluid=True)
+], style={"background": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", "minHeight": "100vh"})
 
 
 # Mostrar ríos en el dashboard al hacer clic en el botón
@@ -217,12 +357,59 @@ from dash.exceptions import PreventUpdate
 def show_rios_list(n_clicks):
     if not n_clicks:
         raise PreventUpdate
+    
     rios = get_all_rios_api()
     if not rios:
-        return dbc.Alert("No se pudieron obtener ríos desde la API.", color="danger")
+        return dbc.Alert([
+            html.I(className="bi bi-exclamation-triangle me-2"),
+            "No se pudieron obtener ríos desde la API."
+        ], color="warning", className="alert-modern")
+    
+    # Organizar ríos por región para mejor presentación
+    rios_por_region = {}
+    for rio in rios:
+        region = RIO_REGION.get(rio.upper(), "Sin región definida")
+        if region not in rios_por_region:
+            rios_por_region[region] = []
+        rios_por_region[region].append(rio)
+    
+    # Crear cards por región
+    region_cards = []
+    for region, rios_region in sorted(rios_por_region.items()):
+        if region == "Sin región definida":
+            continue
+            
+        card = dbc.Card([
+            dbc.CardHeader([
+                html.I(className="bi bi-geo-alt-fill me-2", style={"color": "#667eea"}),
+                html.Strong(region),
+                dbc.Badge(f"{len(rios_region)} ríos", color="info", className="ms-2")
+            ]),
+            dbc.CardBody([
+                html.Div([
+                    dbc.Badge(f"🌊 {rio}", color="light", className="me-2 mb-2") 
+                    for rio in sorted(rios_region)[:10]  # Mostrar solo los primeros 10
+                ], style={"maxHeight": "200px", "overflowY": "auto"}),
+                html.Small(f"Mostrando {min(10, len(rios_region))} de {len(rios_region)} ríos", 
+                          className="text-muted")
+            ])
+        ], className="mb-3 card-modern")
+        region_cards.append(card)
+    
     return html.Div([
-        html.H6("Ríos únicos encontrados en la API (desde 2000):", className="fw-bold mt-2"),
-        html.Pre("\n".join(rios), style={"maxHeight": "300px", "overflowY": "auto", "background": "#f8f9fa", "padding": "1em", "fontSize": "1em"})
+        dbc.Alert([
+            html.I(className="bi bi-info-circle me-2"),
+            f"Se encontraron {len(rios)} ríos únicos en la base de datos (período desde 2000)"
+        ], color="info", className="alert-modern mb-3"),
+        
+        html.H5([
+            html.I(className="bi bi-collection me-2"),
+            "Inventario de Ríos por Región Hidrológica"
+        ], className="mb-3"),
+        
+        dbc.Row([
+            dbc.Col(region_cards, width=12)
+        ])
     ])
 
 
@@ -237,7 +424,12 @@ def show_rios_list(n_clicks):
     [Input("region-dropdown", "value")]
 )
 def update_rio_options(region):
-    rios_region = get_rio_options(region)
+    # Si se selecciona "Todas las regiones", mostrar todos los ríos disponibles
+    if region == "__ALL_REGIONS__":
+        rios_region = get_rio_options()  # Obtener todos los ríos sin filtro de región
+    else:
+        rios_region = get_rio_options(region)
+    
     options = [{"label": "Todos los ríos", "value": "__ALL__"}]
     options += [{"label": r, "value": r} for r in rios_region]
     return options
@@ -362,7 +554,7 @@ def update_content(n_clicks, rio, start_date, end_date, region):
         # Si hay región seleccionada, filtrar por región, si no, mostrar todas las regiones
         data['Region'] = data['Name'].map(RIO_REGION)
         
-        if region:
+        if region and region != "__ALL_REGIONS__":
             data_filtered = data[data['Region'] == region]
             title_suffix = f"en la región {region}"
             embalses_df = get_embalses_capacidad(region)
@@ -376,6 +568,40 @@ def update_content(n_clicks, rio, start_date, end_date, region):
                 print(f"Error obteniendo embalses para el filtro: {e}")
                 embalses_region = []
         else:
+            # Si no hay región específica o es "Todas las regiones", mostrar vista nacional
+            if region == "__ALL_REGIONS__":
+                # Mostrar la vista panorámica nacional como al inicio
+                region_df = data.groupby(['Region', 'Date'])['Value'].sum().reset_index()
+                region_df = region_df[region_df['Region'].notna()]  # Filtrar regiones válidas
+                
+                # Obtener datos de embalses para todas las regiones con estructura jerárquica
+                regiones_totales, df_completo_embalses = get_tabla_regiones_embalses()
+                
+                return html.Div([
+                    html.H5("🇨🇴 Contribución Energética por Región Hidrológica de Colombia", className="text-center mb-2"),
+                    html.P("Vista panorámica nacional: Series temporales comparativas de aportes de caudal por región hidrológica. Haga clic en cualquier punto para ver el detalle agregado diario de la región. Los datos incluyen todos los ríos monitoreados en el período seleccionado, agrupados por región para análisis comparativo nacional.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
+                    dbc.Row([
+                        dbc.Col(create_bar_chart(region_df, "Aportes por región - Todas las regiones"), md=12)
+                    ]),
+                    dcc.Store(id="region-data-store", data=data.to_dict('records')),
+                    dcc.Store(id="embalses-completo-data", data=df_completo_embalses.to_dict('records')),
+                    dbc.Modal([
+                        dbc.ModalHeader(dbc.ModalTitle(id="modal-title-dynamic", children="Detalle de datos hidrológicos"), close_button=True),
+                        dbc.ModalBody([
+                            html.Div(id="modal-description", className="mb-3", style={"fontSize": "0.9rem", "color": "#666"}),
+                            html.Div(id="modal-table-content")
+                        ]),
+                    ], id="modal-rio-table", is_open=False, size="xl", backdrop=True, centered=True, style={"zIndex": 2000}),
+                    html.Hr(),
+                    html.H5("⚡ Capacidad Útil Diaria de Energía por Región Hidrológica", className="text-center mt-4 mb-2"),
+                    html.P("📋 Interfaz expandible: Cada región se puede plegar/desplegar para ver sus embalses constituyentes. Los totales incluyen la suma de todos los embalses por región con participación porcentual del sistema nacional.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
+                    dbc.Row([
+                        dbc.Col([
+                            create_collapsible_regions_table()
+                        ], md=12)
+                    ])
+                ])
+            
             data_filtered = data
             title_suffix = "- Todas las regiones"
             embalses_df = get_embalses_capacidad()
@@ -510,37 +736,11 @@ def load_default_data(start_date, end_date):
                         ]),
                     ], id="modal-rio-table", is_open=False, size="xl", backdrop=True, centered=True, style={"zIndex": 2000}),
                     html.Hr(),
-                    html.H5("Capacidad útil diaria de energía por región", className="text-center mt-4 mb-2"),
-                    html.P("Haz clic en una región para ver sus embalses", className="text-center text-muted mb-3"),
+                    html.H5("⚡ Capacidad Útil Diaria de Energía por Región Hidrológica", className="text-center mt-4 mb-2"),
+                    html.P("📋 Interfaz expandible: Cada región se puede plegar/desplegar para ver sus embalses constituyentes. Los totales incluyen la suma de todos los embalses por región con participación porcentual del sistema nacional.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
                     dbc.Row([
                         dbc.Col([
-                            dash_table.DataTable(
-                                id="tabla-regiones-embalses",
-                                data=regiones_totales.to_dict('records'),
-                                columns=[
-                                    {"name": "Región", "id": "Región"},
-                                    {"name": "Total (GWh)", "id": "Total (GWh)"},
-                                    {"name": "Participación (%)", "id": "Participación (%)"}
-                                ],
-                                style_cell={'textAlign': 'left', 'padding': '6px', 'fontFamily': 'Arial', 'fontSize': 14},
-                                style_header={'backgroundColor': '#e3e3e3', 'fontWeight': 'bold'},
-                                style_data={'backgroundColor': '#f8f8f8'},
-                                style_data_conditional=[
-                                    {
-                                        'if': {'filter_query': '{Tipo} = "region"'},
-                                        'backgroundColor': '#e8f4fd',
-                                        'fontWeight': 'bold',
-                                        'cursor': 'pointer'
-                                    },
-                                    {
-                                        'if': {'filter_query': '{Tipo} = "embalse"'},
-                                        'backgroundColor': '#f8f8f8',
-                                        'fontStyle': 'italic'
-                                    }
-                                ],
-                                page_action="none",
-                                row_selectable="single"
-                            ),
+                            create_collapsible_regions_table()
                         ], md=12)
                     ])
                 ])
@@ -558,7 +758,6 @@ def load_default_data(start_date, end_date):
     [State("embalse-cap-data", "data"), State("participacion-data", "data")]
 )
 def update_tabla_capacidad_embalse(embalse, data_capacidad, data_participacion):
-    import pandas as pd
     df_cap = pd.DataFrame(data_capacidad)
     df_part = pd.DataFrame(data_participacion)
     
@@ -586,68 +785,6 @@ def update_tabla_capacidad_embalse(embalse, data_capacidad, data_participacion):
         records_part.append(total_row_part)
     
     return records_cap, records_part
-
-# --- Callback para manejar expansión/contracción de regiones en la tabla ---
-@app.callback(
-    Output("tabla-regiones-embalses", "data"),
-    [Input("tabla-regiones-embalses", "selected_rows")],
-    [State("tabla-regiones-embalses", "data"), State("embalses-completo-data", "data")]
-)
-def expand_region_table(selected_rows, current_data, embalses_data):
-    if not selected_rows or not current_data:
-        # Si no hay selección, mostrar solo regiones
-        regiones_totales, _ = get_tabla_regiones_embalses()
-        return regiones_totales.to_dict('records')
-    
-    import pandas as pd
-    df_current = pd.DataFrame(current_data)
-    df_embalses_completo = pd.DataFrame(embalses_data)
-    
-    selected_row_idx = selected_rows[0]
-    if selected_row_idx >= len(df_current):
-        return current_data
-        
-    selected_row = df_current.iloc[selected_row_idx]
-    
-    # Si se seleccionó una región, expandir o contraer
-    if selected_row.get('Tipo') == 'region':
-        region_name = selected_row['Región']
-        
-        # Verificar si ya está expandida (buscar embalses de esta región en la tabla actual)
-        is_expanded = any(
-            row.get('Tipo') == 'embalse' and region_name in str(row.get('Región', ''))
-            for row in current_data[selected_row_idx+1:]
-        )
-        
-        if is_expanded:
-            # Contraer: remover embalses de esta región
-            new_data = []
-            skip_embalses = False
-            for i, row in enumerate(current_data):
-                if i == selected_row_idx:
-                    new_data.append(row)
-                    skip_embalses = True
-                elif skip_embalses and row.get('Tipo') == 'embalse':
-                    # Saltar embalses hasta encontrar otra región
-                    continue
-                else:
-                    skip_embalses = False
-                    new_data.append(row)
-            return new_data
-        else:
-            # Expandir: agregar embalses de esta región
-            embalses_region = get_embalses_by_region(region_name, df_embalses_completo)
-            
-            new_data = current_data.copy()
-            # Insertar embalses después de la región seleccionada
-            insert_idx = selected_row_idx + 1
-            for _, embalse_row in embalses_region.iterrows():
-                new_data.insert(insert_idx, embalse_row.to_dict())
-                insert_idx += 1
-            
-            return new_data
-    
-    return current_data
 
 # --- Función para calcular participación porcentual de embalses ---
 def get_participacion_embalses(df_embalses):
@@ -766,6 +903,271 @@ def get_tabla_regiones_embalses():
         print(f"Error creando tabla de regiones: {e}")
         return pd.DataFrame(), pd.DataFrame()
 
+def create_collapsible_regions_table():
+    """
+    Crea una tabla expandible elegante con regiones que se pueden plegar/desplegar para ver embalses.
+    """
+    try:
+        regiones_totales, df_completo_embalses = get_tabla_regiones_embalses()
+        
+        if regiones_totales.empty:
+            return dbc.Alert("No se encontraron datos de regiones.", color="warning", className="text-center")
+        
+        # Crear componentes colapsables elegantes para cada región
+        region_components = []
+        
+        for idx, region_row in regiones_totales.iterrows():
+            region_name = region_row['Región']
+            total_gwh = region_row['Total (GWh)']
+            participacion = region_row['Participación (%)']
+            
+            # Obtener embalses de la región
+            embalses_region = get_embalses_by_region(region_name, df_completo_embalses)
+            
+            # Contar embalses para mostrar en el header
+            num_embalses = len(embalses_region) if not embalses_region.empty else 0
+            
+            # Crear contenido de embalses con las dos tablas lado a lado
+            if not embalses_region.empty:
+                # Preparar datos para las tablas
+                embalses_data = []
+                for _, embalse_row in embalses_region.iterrows():
+                    embalse_name = embalse_row['Región'].replace('    └─ ', '')
+                    embalse_capacidad = embalse_row['Total (GWh)']
+                    embalse_participacion = embalse_row['Participación (%)']
+                    
+                    embalses_data.append({
+                        'Embalse': embalse_name,
+                        'Capacidad Útil Diaria (GWh)': embalse_capacidad,
+                        'Participación (%)': embalse_participacion
+                    })
+                
+                # Crear tabla de participación porcentual
+                tabla_participacion = dash_table.DataTable(
+                    data=[{
+                        'Embalse': row['Embalse'],
+                        'Participación (%)': row['Participación (%)']
+                    } for row in embalses_data] + [{'Embalse': 'TOTAL', 'Participación (%)': 100.0}],
+                    columns=[
+                        {"name": "Embalse", "id": "Embalse"},
+                        {"name": "Participación (%)", "id": "Participación (%)"}
+                    ],
+                    style_cell={
+                        'textAlign': 'left',
+                        'padding': '8px',
+                        'fontFamily': 'Inter, Arial, sans-serif',
+                        'fontSize': 13,
+                        'backgroundColor': '#f8f9fa',
+                        'border': '1px solid #dee2e6'
+                    },
+                    style_header={
+                        'backgroundColor': '#667eea',
+                        'color': 'white',
+                        'fontWeight': 'bold',
+                        'fontSize': 14,
+                        'textAlign': 'center',
+                        'border': '1px solid #5a6cf0'
+                    },
+                    style_data_conditional=[
+                        {
+                            'if': {'filter_query': '{Embalse} = "TOTAL"'},
+                            'backgroundColor': '#007bff',
+                            'color': 'white',
+                            'fontWeight': 'bold'
+                        }
+                    ],
+                    page_action="none"
+                )
+                
+                # Crear tabla de capacidad detallada
+                tabla_capacidad = dash_table.DataTable(
+                    data=embalses_data + [{
+                        'Embalse': 'TOTAL',
+                        'Capacidad Útil Diaria (GWh)': sum([row['Capacidad Útil Diaria (GWh)'] for row in embalses_data]),
+                        'Participación (%)': ''
+                    }],
+                    columns=[
+                        {"name": "Embalse", "id": "Embalse"},
+                        {"name": "Capacidad Útil Diaria (GWh)", "id": "Capacidad Útil Diaria (GWh)"}
+                    ],
+                    style_cell={
+                        'textAlign': 'left',
+                        'padding': '8px',
+                        'fontFamily': 'Inter, Arial, sans-serif',
+                        'fontSize': 13,
+                        'backgroundColor': '#f8f9fa',
+                        'border': '1px solid #dee2e6'
+                    },
+                    style_header={
+                        'backgroundColor': '#28a745',
+                        'color': 'white',
+                        'fontWeight': 'bold',
+                        'fontSize': 14,
+                        'textAlign': 'center',
+                        'border': '1px solid #218838'
+                    },
+                    style_data_conditional=[
+                        {
+                            'if': {'filter_query': '{Embalse} = "TOTAL"'},
+                            'backgroundColor': '#007bff',
+                            'color': 'white',
+                            'fontWeight': 'bold'
+                        }
+                    ],
+                    page_action="none"
+                )
+                
+                embalses_content = html.Div([
+                    html.Div([
+                        html.I(className="bi bi-building me-2", style={"color": "#28a745"}),
+                        html.Strong(f"Análisis Detallado - {region_name}", 
+                                  className="text-success", style={"fontSize": "1.1rem"})
+                    ], className="mb-4 d-flex align-items-center"),
+                    
+                    # Las dos tablas lado a lado
+                    dbc.Row([
+                        dbc.Col([
+                            dbc.Card([
+                                dbc.CardHeader([
+                                    html.I(className="bi bi-pie-chart me-2", style={"color": "#667eea"}),
+                                    html.Strong("📊 Participación Porcentual por Embalse")
+                                ], style={"background": "linear-gradient(135deg, #e3f2fd 0%, #f3f4f6 100%)",
+                                         "border": "none", "borderRadius": "8px 8px 0 0"}),
+                                dbc.CardBody([
+                                    html.P("Distribución porcentual de la capacidad energética entre embalses. La tabla incluye una fila TOTAL que suma exactamente 100%.", 
+                                          className="text-muted mb-3", style={"fontSize": "0.85rem"}),
+                                    tabla_participacion
+                                ], className="p-3")
+                            ], className="card-modern h-100")
+                        ], md=6),
+                        
+                        dbc.Col([
+                            dbc.Card([
+                                dbc.CardHeader([
+                                    html.I(className="bi bi-battery-full me-2", style={"color": "#28a745"}),
+                                    html.Strong("🏭 Capacidad Detallada por Embalse")
+                                ], style={"background": "linear-gradient(135deg, #e8f5e8 0%, #f3f4f6 100%)",
+                                         "border": "none", "borderRadius": "8px 8px 0 0"}),
+                                dbc.CardBody([
+                                    html.P(f"Valores específicos de capacidad útil diaria en GWh para los {num_embalses} embalses de la región.", 
+                                          className="text-muted mb-3", style={"fontSize": "0.85rem"}),
+                                    tabla_capacidad
+                                ], className="p-3")
+                            ], className="card-modern h-100")
+                        ], md=6)
+                    ], className="g-3")
+                ])
+            else:
+                embalses_content = dbc.Alert([
+                    html.I(className="bi bi-exclamation-triangle me-2"),
+                    f"No se encontraron embalses para la región {region_name}."
+                ], color="light", className="text-center my-3 alert-modern")
+            
+            # Crear card principal elegante para la región
+            region_card = dbc.Card([
+                # Header clickeable de la región
+                dbc.CardHeader([
+                    dbc.Button([
+                        html.Div([
+                            html.Div([
+                                html.I(className="bi bi-chevron-right me-3", 
+                                       id={"type": "chevron-region", "index": idx},
+                                       style={"fontSize": "1.1rem", "color": "#007bff", "transition": "transform 0.3s ease"}),
+                                html.I(className="bi bi-geo-alt-fill me-2", style={"color": "#28a745"}),
+                                html.Strong(region_name, style={"fontSize": "1.1rem", "color": "#2d3748"})
+                            ], className="d-flex align-items-center"),
+                            html.Div([
+                                dbc.Badge(f"{total_gwh} GWh", color="primary", className="me-2 px-2 py-1"),
+                                dbc.Badge(f"{participacion}%", color="success", className="px-2 py-1"),
+                                html.Small(f" • {num_embalses} embalse{'s' if num_embalses != 1 else ''}", 
+                                         className="text-muted ms-2")
+                            ], className="d-flex align-items-center mt-1")
+                        ], className="d-flex justify-content-between align-items-start w-100")
+                    ], 
+                    id={"type": "toggle-region", "index": idx},
+                    className="w-100 text-start border-0 bg-transparent p-0",
+                    style={"background": "transparent !important"}
+                    )
+                ], className="border-0 bg-gradient", 
+                style={
+                    "background": f"linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+                    "borderRadius": "12px 12px 0 0",
+                    "padding": "1rem"
+                }),
+                
+                # Contenido colapsable
+                dbc.Collapse([
+                    dbc.CardBody([
+                        html.Hr(className="mt-0 mb-3", style={"borderColor": "#dee2e6"}),
+                        embalses_content
+                    ], className="pt-0", style={"backgroundColor": "#fdfdfe"})
+                ],
+                id={"type": "collapse-region", "index": idx},
+                is_open=False
+                )
+            ], className="mb-3 shadow-sm",
+            style={
+                "border": "1px solid #e3e6f0",
+                "borderRadius": "12px",
+                "transition": "all 0.3s ease",
+                "overflow": "hidden"
+            })
+            
+            region_components.append(region_card)
+        
+        return html.Div([
+            # Header explicativo elegante
+            dbc.Card([
+                dbc.CardBody([
+                    html.Div([
+                        html.I(className="bi bi-info-circle-fill me-2", style={"color": "#0d6efd"}),
+                        html.Strong("⚡ Capacidad Útil Diaria de Energía por Región Hidrológica", style={"fontSize": "1.2rem"})
+                    ], className="d-flex align-items-center mb-2"),
+                    html.P([
+                        "Haz clic en cualquier región para expandir y ver sus tablas detalladas. ",
+                        html.Strong("Cada región muestra dos tablas lado a lado:", className="text-primary"),
+                        " participación porcentual de embalses y capacidad energética detallada en GWh."
+                    ], className="mb-0 text-dark", style={"fontSize": "0.95rem"})
+                ], className="py-3")
+            ], className="mb-4", 
+            style={
+                "background": "linear-gradient(135deg, #e3f2fd 0%, #f3f4f6 100%)",
+                "border": "1px solid #bbdefb",
+                "borderRadius": "12px"
+            }),
+            
+            # Container de regiones
+            html.Div(region_components, id="regions-container")
+        ])
+        
+    except Exception as e:
+        print(f"Error creando tabla colapsable: {e}")
+        return dbc.Alert(f"Error al crear tabla: {str(e)}", color="danger")
+
+
+# Callback elegante para manejar el pliegue/despliegue de regiones
+@app.callback(
+    [Output({"type": "collapse-region", "index": dash.dependencies.MATCH}, "is_open"),
+     Output({"type": "chevron-region", "index": dash.dependencies.MATCH}, "className")],
+    [Input({"type": "toggle-region", "index": dash.dependencies.MATCH}, "n_clicks")],
+    [State({"type": "collapse-region", "index": dash.dependencies.MATCH}, "is_open")]
+)
+def toggle_region_collapse(n_clicks, is_open):
+    """
+    Callback elegante para manejar el toggle de una región específica usando pattern-matching
+    """
+    if not n_clicks:
+        return False, "bi bi-chevron-right me-3"
+    
+    new_state = not is_open
+    if new_state:
+        # Expandido - rotar chevron hacia abajo
+        return True, "bi bi-chevron-down me-3"
+    else:
+        # Contraído - chevron hacia la derecha
+        return False, "bi bi-chevron-right me-3"
+
+
 def get_embalses_by_region(region, df_completo):
     """
     Obtiene los embalses de una región específica con participación dentro de esa región.
@@ -786,13 +1188,16 @@ def get_embalses_by_region(region, df_completo):
     else:
         embalses_region['Participación (%)'] = 0
     
-    # Formatear para mostrar como sub-elementos
-    resultado = embalses_region[['Embalse', 'Capacidad Útil Diaria (GWh)', 'Participación (%)']].copy()
-    resultado = resultado.rename(columns={'Embalse': 'Región', 'Capacidad Útil Diaria (GWh)': 'Total (GWh)'})
-    resultado['Región'] = '    └─ ' + resultado['Región'].astype(str)  # Identar embalses
-    resultado['Tipo'] = 'embalse'
-    
-    return resultado
+    # Formatear para mostrar como sub-elementos - usar la columna correcta 'Embalse'
+    if 'Embalse' in embalses_region.columns:
+        resultado = embalses_region[['Embalse', 'Capacidad Útil Diaria (GWh)', 'Participación (%)']].copy()
+        resultado = resultado.rename(columns={'Embalse': 'Región', 'Capacidad Útil Diaria (GWh)': 'Total (GWh)'})
+        resultado['Región'] = '    └─ ' + resultado['Región'].astype(str)  # Identar embalses
+        resultado['Tipo'] = 'embalse'
+        return resultado
+    else:
+        print(f"Warning: Columnas disponibles en df_completo: {embalses_region.columns.tolist()}")
+        return pd.DataFrame()
 def get_embalses_capacidad(region=None):
     """
     Obtiene la capacidad útil diaria de energía por embalse desde la API XM (CapaUtilDiarEner).
@@ -896,25 +1301,71 @@ def create_data_table(data):
     )
 
 def create_line_chart(data):
-    """Gráfico de líneas de caudal"""
+    """Gráfico de líneas moderno de caudal"""
     if data is None or data.empty:
-        return dbc.Alert("No se pueden crear gráficos con estos datos.", color="warning")
+        return dbc.Alert("No se pueden crear gráficos con estos datos.", color="warning", className="alert-modern")
+    
     # Esperar columnas 'Fecha' y 'GWh' tras el renombrado
     if 'Fecha' in data.columns and 'GWh' in data.columns:
-        fig = px.line(data, x='Fecha', y='GWh', labels={'GWh': "GWh", 'Fecha': "Fecha"}, markers=True)
-        fig.update_layout(height=350, margin=dict(l=10, r=10, t=30, b=10), template="simple_white")
-        return dcc.Graph(figure=fig)
+        fig = px.line(data, x='Fecha', y='GWh', 
+                     labels={'GWh': "Energía (GWh)", 'Fecha': "Fecha"}, 
+                     markers=True)
+        
+        # Aplicar tema moderno
+        fig.update_layout(
+            height=400,
+            margin=dict(l=20, r=20, t=40, b=20),
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(family="Inter, Arial, sans-serif", size=12),
+            title_font_size=16,
+            xaxis=dict(
+                showgrid=True,
+                gridwidth=1,
+                gridcolor='rgba(128,128,128,0.2)',
+                showline=True,
+                linewidth=2,
+                linecolor='rgba(128,128,128,0.3)'
+            ),
+            yaxis=dict(
+                showgrid=True,
+                gridwidth=1,
+                gridcolor='rgba(128,128,128,0.2)',
+                showline=True,
+                linewidth=2,
+                linecolor='rgba(128,128,128,0.3)'
+            )
+        )
+        
+        # Estilo moderno de la línea
+        fig.update_traces(
+            line=dict(width=3, color='#667eea'),
+            marker=dict(size=8, color='#764ba2', 
+                       line=dict(width=2, color='white')),
+            hovertemplate='<b>Fecha:</b> %{x}<br><b>Energía:</b> %{y:.2f} GWh<extra></extra>'
+        )
+        
+        return dbc.Card([
+            dbc.CardHeader([
+                html.I(className="bi bi-graph-up-arrow me-2", style={"color": "#667eea"}),
+                html.Strong("Evolución Temporal", style={"fontSize": "1.1rem"})
+            ]),
+            dbc.CardBody([
+                dcc.Graph(figure=fig)
+            ], className="p-2")
+        ], className="card-modern chart-container")
     else:
-        return dbc.Alert("No se pueden crear gráficos con estos datos.", color="warning")
+        return dbc.Alert("No se pueden crear gráficos con estos datos.", color="warning", className="alert-modern")
 
 def create_bar_chart(data, metric_name):
-    """Crear gráfico de líneas por región o río"""
+    """Crear gráfico de líneas moderno por región o río"""
     # Detectar columnas categóricas y numéricas
     cat_cols = [col for col in data.columns if data[col].dtype == 'object']
     num_cols = [col for col in data.columns if data[col].dtype in ['float64', 'int64']]
     
     if not cat_cols or not num_cols:
-        return dbc.Alert("No se pueden crear gráficos de líneas con estos datos.", color="warning")
+        return dbc.Alert("No se pueden crear gráficos de líneas con estos datos.", 
+                        color="warning", className="alert-modern")
     
     cat_col = cat_cols[0]
     num_col = num_cols[0]
@@ -929,9 +1380,10 @@ def create_bar_chart(data, metric_name):
                 x='Date',
                 y='Value', 
                 color='Region',
-                title="Aportes de Caudal (GWh) por Región",
-                labels={'Value': "Caudal (GWh)", 'Date': "Fecha", 'Region': "Región"},
-                markers=True
+                title="Aportes Energéticos por Región Hidrológica",
+                labels={'Value': "Energía (GWh)", 'Date': "Fecha", 'Region': "Región"},
+                markers=True,
+                color_discrete_sequence=px.colors.qualitative.Set2
             )
             # Asegurar que cada línea tenga información de región para el click
             fig.for_each_trace(lambda t: t.update(legendgroup=t.name, customdata=[t.name] * len(t.x)))
@@ -944,10 +1396,10 @@ def create_bar_chart(data, metric_name):
                 region_data,
                 x='Region',
                 y=num_col,
-                title="Aportes de Caudal (GWh) por Región",
-                labels={num_col: "Caudal (GWh)", 'Region': "Región"},
+                title="Contribución Total por Región Hidrológica",
+                labels={num_col: "Energía (GWh)", 'Region': "Región"},
                 markers=True,
-                color_discrete_sequence=px.colors.qualitative.Set1
+                color_discrete_sequence=['#667eea']
             )
     else:
         # Agrupar y ordenar datos de mayor a menor - usar líneas en lugar de barras
@@ -955,37 +1407,74 @@ def create_bar_chart(data, metric_name):
         grouped_data = grouped_data.sort_values(by=num_col, ascending=False)
         
         fig = px.line(
-            grouped_data.head(20),  # Top 20 para mejor visualización
+            grouped_data.head(15),  # Top 15 para mejor visualización
             x=cat_col,
             y=num_col,
-            title=f"Aportes de Caudal (GWh) por Río",
-            labels={num_col: "Caudal (GWh)", cat_col: "Río"},
-            markers=True
+            title="Aportes Energéticos por Río",
+            labels={num_col: "Energía (GWh)", cat_col: "Río"},
+            markers=True,
+            color_discrete_sequence=['#667eea']
         )
     
+    # Aplicar estilo moderno
     fig.update_layout(
-        height=500,
-        xaxis_tickangle=-45,
-        template="plotly_white"
+        height=550,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(family="Inter, Arial, sans-serif", size=12),
+        title=dict(
+            font_size=16,
+            x=0.5,
+            xanchor='center',
+            font_color='#2d3748'
+        ),
+        xaxis=dict(
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(128,128,128,0.2)',
+            showline=True,
+            linewidth=2,
+            linecolor='rgba(128,128,128,0.3)',
+            tickangle=-45
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(128,128,128,0.2)',
+            showline=True,
+            linewidth=2,
+            linecolor='rgba(128,128,128,0.3)'
+        ),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        )
     )
     
     # Mejorar el estilo para todos los gráficos de líneas
     fig.update_traces(
-        marker=dict(size=8),
-        line=dict(width=3)
+        marker=dict(size=10, line=dict(width=2, color='white')),
+        line=dict(width=4),
+        hovertemplate='<b>%{fullData.name}</b><br>Valor: %{y:.2f} GWh<extra></extra>'
     )
+    
+    chart_title = "Aportes de Energía por Región" if 'Region' in data.columns else "Aportes de Energía por Río"
     
     return dbc.Card([
         dbc.CardHeader([
-            html.H6([
-                html.I(className="bi bi-graph-up me-2"),
-                "Aportes de Caudal por Región" if 'Region' in data.columns else "Aportes de Caudal por Río"
-            ], className="mb-0")
+            html.Div([
+                html.I(className="bi bi-graph-up me-2", style={"color": "#667eea"}),
+                html.Strong(chart_title, style={"fontSize": "1.2rem"})
+            ], className="d-flex align-items-center"),
+            html.Small("Haz clic en cualquier punto para ver detalles", className="text-muted")
         ]),
         dbc.CardBody([
             dcc.Graph(id="bar-rio-graph", figure=fig, clear_on_unhover=True)
-        ])
-    ])
+        ], className="p-2")
+    ], className="card-modern chart-container shadow-lg")
 # Callback para mostrar el modal con la tabla diaria al hacer click en un punto de la línea
 @app.callback(
     [Output("modal-rio-table", "is_open"), Output("modal-table-content", "children"), 
@@ -1166,15 +1655,14 @@ def create_stats_summary(data):
                     'fontFamily': 'Arial'
                 },
                 style_header={
-                    'backgroundColor': 'rgb(230, 230, 230)',
+                    'backgroundColor': '#3498db',
+                    'color': 'white',
                     'fontWeight': 'bold'
                 },
-                style_data={
-                    'backgroundColor': 'rgb(248, 248, 248)'
-                }
+                style_data={'backgroundColor': '#f8f9fa'},
             )
         ])
     ])
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=8050)
+    app.run_server(debug=True, host="0.0.0.0", port=8050)
