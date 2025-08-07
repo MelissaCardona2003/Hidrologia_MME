@@ -33,7 +33,7 @@ app = dash.Dash(__name__,
                     "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
                 ])
 
-# Custom CSS para mejorar la apariencia
+# Custom CSS para aplicar el estilo del Ministerio de Minas y Energía de Colombia
 app.index_string = '''
 <!DOCTYPE html>
 <html>
@@ -43,65 +43,339 @@ app.index_string = '''
         {%favicon%}
         {%css%}
         <style>
+            /* Paleta de colores oficial del Ministerio de Minas y Energía */
+            :root {
+                --mme-azul-principal: #003366;    /* Azul institucional principal */
+                --mme-azul-secundario: #0066cc;   /* Azul secundario */
+                --mme-azul-claro: #4da6ff;       /* Azul claro */
+                --mme-verde-energia: #00b050;     /* Verde energético */
+                --mme-verde-claro: #66d9a0;      /* Verde claro */
+                --mme-blanco: #ffffff;            /* Blanco institucional */
+                --mme-gris-claro: #f5f7fa;       /* Gris claro de fondo */
+                --mme-gris-medio: #e8ecf0;       /* Gris medio */
+                --mme-gris-texto: #2c3e50;       /* Gris para texto */
+                --mme-dorado: #ffd700;           /* Dorado para acentos */
+            }
+            
             body {
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
+                color: var(--mme-gris-texto);
                 min-height: 100vh;
+                margin: 0;
+                padding: 0;
             }
+            
             .main-container {
-                backdrop-filter: blur(20px);
-                background: rgba(255, 255, 255, 0.95);
-                border-radius: 20px;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-                margin: 20px;
+                background: var(--mme-blanco);
+                border-radius: 15px;
+                box-shadow: 0 20px 60px rgba(0, 51, 102, 0.15);
+                margin: 20px auto;
+                padding: 40px;
+                max-width: 1400px;
+                animation: fadeInUp 0.8s ease-out;
+                border-top: 5px solid var(--mme-verde-energia);
+            }
+            
+            @keyframes fadeInUp {
+                from { 
+                    opacity: 0; 
+                    transform: translateY(40px); 
+                }
+                to { 
+                    opacity: 1; 
+                    transform: translateY(0); 
+                }
+            }
+            
+            /* Header oficial del MinEnergía */
+            .header-mme {
+                background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
+                color: var(--mme-blanco);
+                border-radius: 12px;
                 padding: 30px;
-                animation: fadeIn 0.8s ease-out;
+                margin-bottom: 30px;
+                box-shadow: 0 8px 25px rgba(0, 51, 102, 0.2);
+                position: relative;
+                overflow: hidden;
             }
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(30px); }
-                to { opacity: 1; transform: translateY(0); }
+            
+            .header-mme::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 150px;
+                height: 150px;
+                background: var(--mme-verde-energia);
+                opacity: 0.1;
+                border-radius: 50%;
+                transform: translate(50%, -50%);
             }
+            
             .header-gradient {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: linear-gradient(135deg, var(--mme-dorado) 0%, var(--mme-verde-energia) 100%);
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
                 background-clip: text;
                 font-weight: 700;
+                margin-bottom: 10px;
             }
-            .card-modern {
+            
+            /* Tarjetas con estilo institucional */
+            .card-mme {
                 border: none;
-                border-radius: 16px;
-                box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+                border-radius: 15px;
+                background: var(--mme-blanco);
+                box-shadow: 0 10px 30px rgba(0, 51, 102, 0.08);
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                backdrop-filter: blur(10px);
+                border-left: 4px solid var(--mme-verde-energia);
+                overflow: hidden;
             }
-            .card-modern:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 16px 48px rgba(0,0,0,0.15);
+            
+            .card-mme:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 20px 50px rgba(0, 51, 102, 0.15);
+                border-left-color: var(--mme-dorado);
             }
-            .btn-modern {
-                border-radius: 12px;
+            
+            .card-header-mme {
+                background: linear-gradient(135deg, var(--mme-gris-claro) 0%, var(--mme-gris-medio) 100%);
+                border: none;
+                padding: 20px 25px;
+                color: var(--mme-azul-principal);
+                font-weight: 600;
+                border-radius: 15px 15px 0 0;
+            }
+            
+            /* Botones con estilo gubernamental */
+            .btn-mme {
+                background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
+                color: var(--mme-blanco);
+                border: none;
+                border-radius: 10px;
+                font-weight: 600;
+                padding: 12px 30px;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(0, 51, 102, 0.3);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                font-size: 14px;
+            }
+            
+            .btn-mme:hover {
+                background: linear-gradient(135deg, var(--mme-verde-energia) 0%, var(--mme-verde-claro) 100%);
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(0, 176, 80, 0.4);
+                color: var(--mme-blanco);
+            }
+            
+            .btn-mme:focus {
+                box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.3);
+            }
+            
+            /* Controles de formulario */
+            .form-control-mme {
+                border: 2px solid var(--mme-gris-medio);
+                border-radius: 10px;
+                padding: 12px 18px;
+                transition: all 0.3s ease;
+                background: var(--mme-blanco);
+                font-size: 14px;
+            }
+            
+            .form-control-mme:focus {
+                border-color: var(--mme-azul-secundario);
+                box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+                background: var(--mme-gris-claro);
+            }
+            
+            /* Tablas con estilo institucional */
+            .table-mme {
+                background: var(--mme-blanco);
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: 0 5px 15px rgba(0, 51, 102, 0.08);
+            }
+            
+            .table-mme thead {
+                background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
+                color: var(--mme-blanco);
+            }
+            
+            .table-mme th {
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                font-size: 13px;
+                padding: 15px;
+                border: none;
+            }
+            
+            .table-mme td {
+                padding: 12px 15px;
+                border-bottom: 1px solid var(--mme-gris-medio);
+                vertical-align: middle;
+            }
+            
+            .table-mme tbody tr:hover {
+                background-color: var(--mme-gris-claro);
+            }
+            
+            /* Indicadores de estado con colores oficiales */
+            .region-expandida {
+                background: linear-gradient(135deg, var(--mme-verde-energia) 0%, var(--mme-verde-claro) 100%);
+                color: var(--mme-blanco);
+                border-radius: 8px;
+                padding: 10px 15px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            
+            .region-contraida {
+                background: linear-gradient(135deg, var(--mme-azul-claro) 0%, var(--mme-azul-secundario) 100%);
+                color: var(--mme-blanco);
+                border-radius: 8px;
+                padding: 10px 15px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            
+            .embalse-item {
+                background: var(--mme-gris-claro);
+                border-left: 3px solid var(--mme-verde-energia);
+                padding: 8px 15px;
+                margin-left: 20px;
+                border-radius: 0 8px 8px 0;
+                font-style: italic;
+                color: var(--mme-gris-texto);
+            }
+            
+            /* Alertas con estilo gubernamental */
+            .alert-mme {
+                border: none;
+                border-radius: 10px;
+                padding: 20px;
                 font-weight: 500;
-                padding: 12px 24px;
-                transition: all 0.3s ease;
-                box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             }
-            .btn-modern:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            
+            .alert-info-mme {
+                background: linear-gradient(135deg, rgba(0, 102, 204, 0.1) 0%, rgba(77, 166, 255, 0.1) 100%);
+                color: var(--mme-azul-principal);
+                border-left: 4px solid var(--mme-azul-secundario);
             }
-            .form-control-modern {
-                border: 2px solid #e1e8ed;
+            
+            .alert-success-mme {
+                background: linear-gradient(135deg, rgba(0, 176, 80, 0.1) 0%, rgba(102, 217, 160, 0.1) 100%);
+                color: var(--mme-verde-energia);
+                border-left: 4px solid var(--mme-verde-energia);
+            }
+            
+            /* Logo y branding */
+            .brand-mme {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .brand-mme .logo {
+                width: 60px;
+                height: 60px;
+                background: var(--mme-verde-energia);
                 border-radius: 12px;
-                padding: 12px 16px;
-                transition: all 0.3s ease;
-                background: rgba(255,255,255,0.8);
-                backdrop-filter: blur(10px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--mme-blanco);
+                font-size: 24px;
+                font-weight: bold;
             }
-            .form-control-modern:focus {
-                border-color: #667eea;
-                box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-                background: rgba(255,255,255,0.95);
+            
+            /* Efectos de carga */
+            .loading-mme {
+                background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
+            }
+            
+            /* Scroll personalizado */
+            ::-webkit-scrollbar {
+                width: 8px;
+            }
+            
+            ::-webkit-scrollbar-track {
+                background: var(--mme-gris-claro);
+                border-radius: 4px;
+            }
+            
+            ::-webkit-scrollbar-thumb {
+                background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
+                border-radius: 4px;
+            }
+            
+            ::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(135deg, var(--mme-verde-energia) 0%, var(--mme-verde-claro) 100%);
+            }
+            
+            /* Header oficial del Ministerio de Minas y Energía */
+            .header-mme {
+                background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
+                padding: 30px 40px;
+                border-radius: 20px;
+                box-shadow: 0 8px 32px rgba(0, 51, 102, 0.3);
+                margin-bottom: 30px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .brand-mme {
+                display: flex;
+                align-items: center;
+                gap: 25px;
+            }
+
+            .brand-mme .logo {
+                background: rgba(255, 255, 255, 0.15);
+                padding: 20px;
+                border-radius: 50%;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .brand-mme .logo i {
+                color: #ffffff;
+                display: block;
+                text-align: center;
+            }
+
+            .header-gradient {
+                background: linear-gradient(45deg, #ffffff, #f0f8ff);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                font-weight: 700;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            
+            /* Responsivo */
+            @media (max-width: 768px) {
+                .main-container {
+                    margin: 10px;
+                    padding: 20px;
+                    border-radius: 10px;
+                }
+                
+                .header-mme {
+                    padding: 20px;
+                    text-align: center;
+                }
+                
+                .brand-mme {
+                    flex-direction: column;
+                    gap: 15px;
+                    text-align: center;
+                }
             }
         </style>
     </head>
@@ -116,7 +390,7 @@ app.index_string = '''
 </html>
 '''
 
-app.title = "⚡ Dashboard Hidrológico MME - Energía Colombia"
+app.title = "Dashboard Hidrológico - Ministerio de Minas y Energía de Colombia"
 
 # Inicializar API XM
 import traceback
@@ -195,27 +469,31 @@ rios = get_rio_options()
 app.layout = html.Div([
     # Container principal con clase CSS personalizada
     dbc.Container([
-        # Header moderno con gradiente
+        # Header oficial del Ministerio de Minas y Energía
         dbc.Row([
             dbc.Col([
                 html.Div([
+                    # Branding oficial del MinEnergía
                     html.Div([
-                        html.I(className="bi bi-lightning-charge-fill me-3", 
-                               style={"fontSize": "3.5rem", "color": "#667eea"}),
                         html.Div([
-                            html.H1("Dashboard Hidrológico del MME", 
+                            html.I(className="bi bi-lightning-charge-fill", style={"fontSize": "32px"})
+                        ], className="logo"),
+                        html.Div([
+                            html.H1("Sistema de Información Hidrológica", 
                                    className="header-gradient mb-1",
-                                   style={"fontSize": "2.5rem", "fontWeight": "700"}),
-                            html.P("Sistema de Información Hidrológica de Colombia - Datos XM",
-                                  className="text-muted mb-2",
-                                  style={"fontSize": "1.2rem", "fontWeight": "400"}),
+                                   style={"fontSize": "2.2rem", "fontWeight": "700"}),
+                            html.H2("Ministerio de Minas y Energía", 
+                                   style={"fontSize": "1.5rem", "fontWeight": "600", "color": "#ffffff", "marginBottom": "8px"}),
+                            html.P("República de Colombia - Datos Hidrológicos XM",
+                                  className="text-light mb-2",
+                                  style={"fontSize": "1.1rem", "fontWeight": "400", "opacity": "0.9"}),
                             dbc.Badge([
                                 html.I(className="bi bi-clock me-1"),
                                 f"Última actualización: {LAST_UPDATE}"
-                            ], color="info", className="px-3 py-1")
+                            ], color="light", className="px-3 py-1", style={"color": "#003366"})
                         ])
-                    ], className="d-flex align-items-center mb-4")
-                ])
+                    ], className="brand-mme")
+                ], className="header-mme")
             ], width=12)
         ], className="mb-4"),
 
@@ -327,19 +605,7 @@ app.layout = html.Div([
                         html.Div([
                             html.I(className="bi bi-database me-2", style={"color": "#667eea"}),
                             html.Strong("Explorador de Datos", style={"fontSize": "1.1rem"})
-                        ], className="mb-3 d-flex align-items-center"),
-                        
-                        dbc.Button([
-                            html.I(className="bi bi-list-ul me-2"),
-                            "Ver Inventario Completo de Ríos"
-                        ],
-                        id="show-rios-btn",
-                        color="secondary",
-                        outline=True,
-                        className="btn-modern mb-3",
-                        style={"border": "2px solid #6c757d"}
-                        ),
-                        html.Div(id="rios-list-output")
+                        ], className="mb-3 d-flex align-items-center")
                     ], className="p-3")
                 ], className="card-modern")
             ], width=12)
@@ -349,75 +615,6 @@ app.layout = html.Div([
 
 
 # Mostrar ríos en el dashboard al hacer clic en el botón
-from dash.exceptions import PreventUpdate
-@app.callback(
-    Output("rios-list-output", "children"),
-    [Input("show-rios-btn", "n_clicks")]
-)
-def show_rios_list(n_clicks):
-    if not n_clicks:
-        raise PreventUpdate
-    
-    rios = get_all_rios_api()
-    if not rios:
-        return dbc.Alert([
-            html.I(className="bi bi-exclamation-triangle me-2"),
-            "No se pudieron obtener ríos desde la API."
-        ], color="warning", className="alert-modern")
-    
-    # Organizar ríos por región para mejor presentación
-    rios_por_region = {}
-    for rio in rios:
-        region = RIO_REGION.get(rio.upper(), "Sin región definida")
-        if region not in rios_por_region:
-            rios_por_region[region] = []
-        rios_por_region[region].append(rio)
-    
-    # Crear cards por región
-    region_cards = []
-    for region, rios_region in sorted(rios_por_region.items()):
-        if region == "Sin región definida":
-            continue
-            
-        card = dbc.Card([
-            dbc.CardHeader([
-                html.I(className="bi bi-geo-alt-fill me-2", style={"color": "#667eea"}),
-                html.Strong(region),
-                dbc.Badge(f"{len(rios_region)} ríos", color="info", className="ms-2")
-            ]),
-            dbc.CardBody([
-                html.Div([
-                    dbc.Badge(f"🌊 {rio}", color="light", className="me-2 mb-2") 
-                    for rio in sorted(rios_region)[:10]  # Mostrar solo los primeros 10
-                ], style={"maxHeight": "200px", "overflowY": "auto"}),
-                html.Small(f"Mostrando {min(10, len(rios_region))} de {len(rios_region)} ríos", 
-                          className="text-muted")
-            ])
-        ], className="mb-3 card-modern")
-        region_cards.append(card)
-    
-    return html.Div([
-        dbc.Alert([
-            html.I(className="bi bi-info-circle me-2"),
-            f"Se encontraron {len(rios)} ríos únicos en la base de datos (período desde 2000)"
-        ], color="info", className="alert-modern mb-3"),
-        
-        html.H5([
-            html.I(className="bi bi-collection me-2"),
-            "Inventario de Ríos por Región Hidrológica"
-        ], className="mb-3"),
-        
-        dbc.Row([
-            dbc.Col(region_cards, width=12)
-        ])
-    ])
-
-
-
-
-
-
-
 # Callback para actualizar ríos según región seleccionada
 @app.callback(
     Output("rio-dropdown", "options"),
@@ -482,38 +679,133 @@ def update_content(n_clicks, rio, start_date, end_date, region):
                         ], id="modal-rio-table", is_open=False, size="xl", backdrop=True, centered=True, style={"zIndex": 2000}),
                         html.Hr(),
                         html.H5("⚡ Capacidad Útil Diaria de Energía por Región Hidrológica", className="text-center mt-4 mb-2"),
-                        html.P("📋 Tabla interactiva jerárquica: Haz clic en cualquier región para expandir y ver el detalle de sus embalses constituyentes. Los totales incluyen la suma de todos los embalses por región con participación porcentual del sistema nacional.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
+                        html.P("📋 Interfaz jerárquica expandible: Haga clic en cualquier región para desplegar sus embalses. Cada región muestra dos tablas lado a lado con participación porcentual y capacidad detallada en GWh. Las flechas ▶️ indican regiones contraídas y 🔽 regiones expandidas.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
                         dbc.Row([
                             dbc.Col([
-                                dash_table.DataTable(
-                                    id="tabla-regiones-embalses",
-                                    data=regiones_totales.to_dict('records'),
-                                    columns=[
-                                        {"name": "Región", "id": "Región"},
-                                        {"name": "Total (GWh)", "id": "Total (GWh)"},
-                                        {"name": "Participación (%)", "id": "Participación (%)"}
-                                    ],
-                                    style_cell={'textAlign': 'left', 'padding': '6px', 'fontFamily': 'Arial', 'fontSize': 14},
-                                    style_header={'backgroundColor': '#e3e3e3', 'fontWeight': 'bold'},
-                                    style_data={'backgroundColor': '#f8f8f8'},
-                                    style_data_conditional=[
-                                        {
-                                            'if': {'filter_query': '{Tipo} = "region"'},
-                                            'backgroundColor': '#e8f4fd',
-                                            'fontWeight': 'bold',
-                                            'cursor': 'pointer'
-                                        },
-                                        {
-                                            'if': {'filter_query': '{Tipo} = "embalse"'},
-                                            'backgroundColor': '#f8f8f8',
-                                            'fontStyle': 'italic'
-                                        }
-                                    ],
-                                    page_action="none",
-                                    row_selectable="single"
-                                ),
-                            ], md=12)
-                        ])
+                                dbc.Card([
+                                    dbc.CardHeader([
+                                        html.I(className="bi bi-pie-chart me-2", style={"color": "#667eea"}),
+                                        html.Strong("📊 Participación Porcentual por Región")
+                                    ], style={"background": "linear-gradient(135deg, #e3f2fd 0%, #f3f4f6 100%)",
+                                             "border": "none", "borderRadius": "8px 8px 0 0"}),
+                                    dbc.CardBody([
+                                        html.P("Distribución porcentual de la capacidad energética entre regiones y sus embalses. Haga clic en una región (▶️) para expandir y ver sus embalses, o en una región expandida (🔽) para contraerla.", 
+                                              className="text-muted mb-3", style={"fontSize": "0.85rem"}),
+                                        dash_table.DataTable(
+                                            id="tabla-participacion-jerarquica",
+                                            data=[],  # Se llenará dinámicamente
+                                            columns=[
+                                                {"name": "Región / Embalse", "id": "nombre"},
+                                                {"name": "Participación (%)", "id": "participacion"}
+                                            ],
+                                            style_cell={
+                                                'textAlign': 'left',
+                                                'padding': '8px',
+                                                'fontFamily': 'Inter, Arial, sans-serif',
+                                                'fontSize': 13,
+                                                'backgroundColor': '#f8f9fa',
+                                                'border': '1px solid #dee2e6'
+                                            },
+                                            style_header={
+                                                'backgroundColor': '#667eea',
+                                                'color': 'white',
+                                                'fontWeight': 'bold',
+                                                'fontSize': 14,
+                                                'textAlign': 'center',
+                                                'border': '1px solid #5a6cf0'
+                                            },
+                                            style_data_conditional=[
+                                                {
+                                                    'if': {'filter_query': '{tipo} = "region"'},
+                                                    'backgroundColor': '#e3f2fd',
+                                                    'fontWeight': 'bold',
+                                                    'cursor': 'pointer',
+                                                    'border': '2px solid #2196f3'
+                                                },
+                                                {
+                                                    'if': {'filter_query': '{tipo} = "embalse"'},
+                                                    'backgroundColor': '#f8f9fa',
+                                                    'fontStyle': 'italic',
+                                                    'paddingLeft': '24px'
+                                                },
+                                                {
+                                                    'if': {'filter_query': '{nombre} = "TOTAL SISTEMA"'},
+                                                    'backgroundColor': '#007bff',
+                                                    'color': 'white',
+                                                    'fontWeight': 'bold'
+                                                }
+                                            ],
+                                            page_action="none"
+                                        )
+                                    ], className="p-3")
+                                ], className="card-modern h-100")
+                            ], md=6),
+                            
+                            dbc.Col([
+                                dbc.Card([
+                                    dbc.CardHeader([
+                                        html.I(className="bi bi-battery-full me-2", style={"color": "#28a745"}),
+                                        html.Strong("🏭 Capacidad Detallada por Región")
+                                    ], style={"background": "linear-gradient(135deg, #e8f5e8 0%, #f3f4f6 100%)",
+                                             "border": "none", "borderRadius": "8px 8px 0 0"}),
+                                    dbc.CardBody([
+                                        html.P("Valores específicos de capacidad útil diaria en GWh por región y embalses. Haga clic en una región (▶️) para expandir y ver sus embalses, o en una región expandida (🔽) para contraerla.", 
+                                              className="text-muted mb-3", style={"fontSize": "0.85rem"}),
+                                        dash_table.DataTable(
+                                            id="tabla-capacidad-jerarquica",
+                                            data=[],  # Se llenará dinámicamente
+                                            columns=[
+                                                {"name": "Región / Embalse", "id": "nombre"},
+                                                {"name": "Capacidad (GWh)", "id": "capacidad"}
+                                            ],
+                                            style_cell={
+                                                'textAlign': 'left',
+                                                'padding': '8px',
+                                                'fontFamily': 'Inter, Arial, sans-serif',
+                                                'fontSize': 13,
+                                                'backgroundColor': '#f8f9fa',
+                                                'border': '1px solid #dee2e6'
+                                            },
+                                            style_header={
+                                                'backgroundColor': '#28a745',
+                                                'color': 'white',
+                                                'fontWeight': 'bold',
+                                                'fontSize': 14,
+                                                'textAlign': 'center',
+                                                'border': '1px solid #218838'
+                                            },
+                                            style_data_conditional=[
+                                                {
+                                                    'if': {'filter_query': '{tipo} = "region"'},
+                                                    'backgroundColor': '#e8f5e8',
+                                                    'fontWeight': 'bold',
+                                                    'cursor': 'pointer',
+                                                    'border': '2px solid #28a745'
+                                                },
+                                                {
+                                                    'if': {'filter_query': '{tipo} = "embalse"'},
+                                                    'backgroundColor': '#f8f9fa',
+                                                    'fontStyle': 'italic',
+                                                    'paddingLeft': '24px'
+                                                },
+                                                {
+                                                    'if': {'filter_query': '{nombre} = "TOTAL SISTEMA"'},
+                                                    'backgroundColor': '#007bff',
+                                                    'color': 'white',
+                                                    'fontWeight': 'bold'
+                                                }
+                                            ],
+                                            page_action="none"
+                                        )
+                                    ], className="p-3")
+                                ], className="card-modern h-100")
+                            ], md=6)
+                        ], className="g-3"),
+                        
+                        # Stores para manejar los datos jerárquicos y estados de expansión
+                        dcc.Store(id="participacion-jerarquica-data", data=[]),
+                        dcc.Store(id="capacidad-jerarquica-data", data=[]),
+                        dcc.Store(id="regiones-expandidas", data=[])
                     ])
                 else:
                     return dbc.Alert("No se pueden procesar los datos obtenidos.", color="warning")
@@ -570,12 +862,9 @@ def update_content(n_clicks, rio, start_date, end_date, region):
         else:
             # Si no hay región específica o es "Todas las regiones", mostrar vista nacional
             if region == "__ALL_REGIONS__":
-                # Mostrar la vista panorámica nacional como al inicio
+                # Mostrar la vista panorámica nacional igual que al cargar la página
                 region_df = data.groupby(['Region', 'Date'])['Value'].sum().reset_index()
                 region_df = region_df[region_df['Region'].notna()]  # Filtrar regiones válidas
-                
-                # Obtener datos de embalses para todas las regiones con estructura jerárquica
-                regiones_totales, df_completo_embalses = get_tabla_regiones_embalses()
                 
                 return html.Div([
                     html.H5("🇨🇴 Contribución Energética por Región Hidrológica de Colombia", className="text-center mb-2"),
@@ -584,7 +873,6 @@ def update_content(n_clicks, rio, start_date, end_date, region):
                         dbc.Col(create_bar_chart(region_df, "Aportes por región - Todas las regiones"), md=12)
                     ]),
                     dcc.Store(id="region-data-store", data=data.to_dict('records')),
-                    dcc.Store(id="embalses-completo-data", data=df_completo_embalses.to_dict('records')),
                     dbc.Modal([
                         dbc.ModalHeader(dbc.ModalTitle(id="modal-title-dynamic", children="Detalle de datos hidrológicos"), close_button=True),
                         dbc.ModalBody([
@@ -594,12 +882,139 @@ def update_content(n_clicks, rio, start_date, end_date, region):
                     ], id="modal-rio-table", is_open=False, size="xl", backdrop=True, centered=True, style={"zIndex": 2000}),
                     html.Hr(),
                     html.H5("⚡ Capacidad Útil Diaria de Energía por Región Hidrológica", className="text-center mt-4 mb-2"),
-                    html.P("📋 Interfaz expandible: Cada región se puede plegar/desplegar para ver sus embalses constituyentes. Los totales incluyen la suma de todos los embalses por región con participación porcentual del sistema nacional.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
+                    html.P("📋 Interfaz jerárquica expandible: Haga clic en cualquier región para desplegar sus embalses. Cada región muestra dos tablas lado a lado con participación porcentual y capacidad detallada en GWh. Las flechas ▶️ indican regiones contraídas y 🔽 regiones expandidas.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
+                    
+                    # Las dos tablas lado a lado con estructura jerárquica expandible
                     dbc.Row([
                         dbc.Col([
-                            create_collapsible_regions_table()
-                        ], md=12)
-                    ])
+                            dbc.Card([
+                                dbc.CardHeader([
+                                    html.I(className="bi bi-pie-chart me-2", style={"color": "#667eea"}),
+                                    html.Strong("📊 Participación Porcentual por Región")
+                                ], style={"background": "linear-gradient(135deg, #e3f2fd 0%, #f3f4f6 100%)",
+                                         "border": "none", "borderRadius": "8px 8px 0 0"}),
+                                dbc.CardBody([
+                                    html.P("Distribución porcentual de la capacidad energética entre regiones y sus embalses. Haga clic en una región (▶️) para expandir y ver sus embalses, o en una región expandida (🔽) para contraerla.", 
+                                          className="text-muted mb-3", style={"fontSize": "0.85rem"}),
+                                    dash_table.DataTable(
+                                        id="tabla-participacion-jerarquica",
+                                        data=[],  # Se llenará dinámicamente
+                                        columns=[
+                                            {"name": "Región / Embalse", "id": "nombre"},
+                                            {"name": "Participación (%)", "id": "participacion"}
+                                        ],
+                                        style_cell={
+                                            'textAlign': 'left',
+                                            'padding': '8px',
+                                            'fontFamily': 'Inter, Arial, sans-serif',
+                                            'fontSize': 13,
+                                            'backgroundColor': '#f8f9fa',
+                                            'border': '1px solid #dee2e6'
+                                        },
+                                        style_header={
+                                            'backgroundColor': '#667eea',
+                                            'color': 'white',
+                                            'fontWeight': 'bold',
+                                            'fontSize': 14,
+                                            'textAlign': 'center',
+                                            'border': '1px solid #5a6cf0'
+                                        },
+                                        style_data_conditional=[
+                                            {
+                                                'if': {'filter_query': '{tipo} = "region"'},
+                                                'backgroundColor': '#e3f2fd',
+                                                'fontWeight': 'bold',
+                                                'cursor': 'pointer',
+                                                'border': '2px solid #2196f3',
+                                                'transition': 'all 0.3s ease'
+                                            },
+                                            {
+                                                'if': {'filter_query': '{tipo} = "embalse"'},
+                                                'backgroundColor': '#f8f9fa',
+                                                'fontStyle': 'italic',
+                                                'paddingLeft': '24px',
+                                                'borderLeft': '3px solid #28a745'
+                                            },
+                                            {
+                                                'if': {'filter_query': '{nombre} = "TOTAL SISTEMA"'},
+                                                'backgroundColor': '#007bff',
+                                                'color': 'white',
+                                                'fontWeight': 'bold'
+                                            }
+                                        ],
+                                        page_action="none"
+                                    )
+                                ], className="p-3")
+                            ], className="card-modern h-100")
+                        ], md=6),
+                        
+                        dbc.Col([
+                            dbc.Card([
+                                dbc.CardHeader([
+                                    html.I(className="bi bi-battery-full me-2", style={"color": "#28a745"}),
+                                    html.Strong("🏭 Capacidad Detallada por Región")
+                                ], style={"background": "linear-gradient(135deg, #e8f5e8 0%, #f3f4f6 100%)",
+                                         "border": "none", "borderRadius": "8px 8px 0 0"}),
+                                dbc.CardBody([
+                                    html.P("Valores específicos de capacidad útil diaria en GWh por región y embalses. Haga clic en una región (▶️) para expandir y ver sus embalses, o en una región expandida (🔽) para contraerla.", 
+                                          className="text-muted mb-3", style={"fontSize": "0.85rem"}),
+                                    dash_table.DataTable(
+                                        id="tabla-capacidad-jerarquica",
+                                        data=[],  # Se llenará dinámicamente
+                                        columns=[
+                                            {"name": "Región / Embalse", "id": "nombre"},
+                                            {"name": "Capacidad (GWh)", "id": "capacidad"}
+                                        ],
+                                        style_cell={
+                                            'textAlign': 'left',
+                                            'padding': '8px',
+                                            'fontFamily': 'Inter, Arial, sans-serif',
+                                            'fontSize': 13,
+                                            'backgroundColor': '#f8f9fa',
+                                            'border': '1px solid #dee2e6'
+                                        },
+                                        style_header={
+                                            'backgroundColor': '#28a745',
+                                            'color': 'white',
+                                            'fontWeight': 'bold',
+                                            'fontSize': 14,
+                                            'textAlign': 'center',
+                                            'border': '1px solid #218838'
+                                        },
+                                        style_data_conditional=[
+                                            {
+                                                'if': {'filter_query': '{tipo} = "region"'},
+                                                'backgroundColor': '#e8f5e8',
+                                                'fontWeight': 'bold',
+                                                'cursor': 'pointer',
+                                                'border': '2px solid #28a745',
+                                                'transition': 'all 0.3s ease'
+                                            },
+                                            {
+                                                'if': {'filter_query': '{tipo} = "embalse"'},
+                                                'backgroundColor': '#f8f9fa',
+                                                'fontStyle': 'italic',
+                                                'paddingLeft': '24px',
+                                                'borderLeft': '3px solid #007bff'
+                                            },
+                                            {
+                                                'if': {'filter_query': '{nombre} = "TOTAL SISTEMA"'},
+                                                'backgroundColor': '#007bff',
+                                                'color': 'white',
+                                                'fontWeight': 'bold'
+                                            }
+                                        ],
+                                        page_action="none"
+                                    )
+                                ], className="p-3")
+                            ], className="card-modern h-100")
+                        ], md=6)
+                    ], className="g-3"),
+                    
+                    # Stores para manejar los datos jerárquicos y estados de expansión
+                    dcc.Store(id="participacion-jerarquica-data", data=[]),
+                    dcc.Store(id="capacidad-jerarquica-data", data=[]),
+                    dcc.Store(id="regiones-expandidas", data=[])
                 ])
             
             data_filtered = data
@@ -695,6 +1110,244 @@ def update_content(n_clicks, rio, start_date, end_date, region):
     except Exception as e:
         return dbc.Alert(f"Error al consultar los datos: {str(e)}", color="danger")
 
+# Callback para inicializar las tablas jerárquicas al cargar la página
+@app.callback(
+    [Output("participacion-jerarquica-data", "data"),
+     Output("capacidad-jerarquica-data", "data"),
+     Output("tabla-participacion-jerarquica", "data"),
+     Output("tabla-capacidad-jerarquica", "data")],
+    [Input("start-date", "date"), Input("end-date", "date")],
+    prevent_initial_call=False
+)
+def initialize_hierarchical_tables(start_date, end_date):
+    """Inicializar las tablas jerárquicas con datos de regiones al cargar la página"""
+    try:
+        regiones_totales, df_completo_embalses = get_tabla_regiones_embalses()
+        
+        if regiones_totales.empty:
+            return [], [], [], []
+        
+        # Crear datos para tabla de participación (solo regiones inicialmente)
+        participacion_data = []
+        capacidad_data = []
+        
+        for _, row in regiones_totales.iterrows():
+            # Datos de participación
+            participacion_data.append({
+                'nombre': f"▶️ {row['Región']}",  # Flecha indicando que se puede expandir
+                'participacion': f"{row['Participación (%)']}%",
+                'tipo': 'region',
+                'region_name': row['Región'],
+                'expandida': False,
+                'id': f"region_{row['Región']}"
+            })
+            
+            # Datos de capacidad
+            capacidad_data.append({
+                'nombre': f"▶️ {row['Región']}",  # Flecha indicando que se puede expandir
+                'capacidad': f"{row['Total (GWh)']} GWh",
+                'tipo': 'region',
+                'region_name': row['Región'],
+                'expandida': False,
+                'id': f"region_{row['Región']}"
+            })
+        
+        # Agregar fila TOTAL al final
+        participacion_data.append({
+            'nombre': 'TOTAL SISTEMA',
+            'participacion': '100.0%',
+            'tipo': 'total',
+            'region_name': '',
+            'expandida': False,
+            'id': 'total'
+        })
+        
+        total_sistema = regiones_totales['Total (GWh)'].sum()
+        capacidad_data.append({
+            'nombre': 'TOTAL SISTEMA',
+            'capacidad': f"{total_sistema:.2f} GWh",
+            'tipo': 'total',
+            'region_name': '',
+            'expandida': False,
+            'id': 'total'
+        })
+        
+        # Datos completos para los stores (incluye embalses)
+        participacion_completa = participacion_data.copy()
+        capacidad_completa = capacidad_data.copy()
+        
+        # Agregar datos de embalses a los stores completos
+        for region_name in regiones_totales['Región'].unique():
+            embalses_region = get_embalses_by_region(region_name, df_completo_embalses)
+            
+            if not embalses_region.empty:
+                for _, embalse_row in embalses_region.iterrows():
+                    embalse_name = embalse_row['Región'].replace('    └─ ', '')
+                    
+                    # Datos de participación para embalses
+                    participacion_completa.append({
+                        'nombre': f"    └─ {embalse_name}",
+                        'participacion': f"{embalse_row['Participación (%)']}%",
+                        'tipo': 'embalse',
+                        'region_name': region_name,
+                        'expandida': False,
+                        'id': f"embalse_{region_name}_{embalse_name}"
+                    })
+                    
+                    # Datos de capacidad para embalses  
+                    capacidad_completa.append({
+                        'nombre': f"    └─ {embalse_name}",
+                        'capacidad': f"{embalse_row['Total (GWh)']} GWh",
+                        'tipo': 'embalse',
+                        'region_name': region_name,
+                        'expandida': False,
+                        'id': f"embalse_{region_name}_{embalse_name}"
+                    })
+        
+        # Retornar: datos completos para stores, datos solo de regiones para tablas iniciales
+        return participacion_completa, capacidad_completa, participacion_data, capacidad_data
+        
+    except Exception as e:
+        print(f"Error inicializando tablas jerárquicas: {e}")
+        return [], [], [], []
+
+# Callback para manejar clics en las regiones y expandir/colapsar embalses
+@app.callback(
+    [Output("tabla-participacion-jerarquica", "data", allow_duplicate=True),
+     Output("tabla-capacidad-jerarquica", "data", allow_duplicate=True),
+     Output("regiones-expandidas", "data")],
+    [Input("tabla-participacion-jerarquica", "active_cell"),
+     Input("tabla-capacidad-jerarquica", "active_cell")],
+    [State("participacion-jerarquica-data", "data"),
+     State("capacidad-jerarquica-data", "data"),
+     State("regiones-expandidas", "data")],
+    prevent_initial_call=True
+)
+def toggle_region_expansion(active_cell_part, active_cell_cap, participacion_complete, capacidad_complete, regiones_expandidas):
+    """Manejar la expansión/colapso de regiones al hacer clic - VERSIÓN SIMPLIFICADA"""
+    try:
+        # Obtener datos del clic
+        active_cell = active_cell_part or active_cell_cap
+        if not active_cell or not participacion_complete or not capacidad_complete:
+            return [], [], regiones_expandidas or []
+        
+        row_id = active_cell['row']
+        if regiones_expandidas is None:
+            regiones_expandidas = []
+        
+        # Reconstruir la vista actual para identificar qué se clicó
+        current_view = []
+        for item in participacion_complete:
+            if item.get('tipo') == 'region':
+                region_name = item.get('region_name')
+                # Agregar región (siempre visible)
+                region_display = item.copy()
+                region_display['nombre'] = f"🔽 {region_name}" if region_name in regiones_expandidas else f"▶️ {region_name}"
+                current_view.append(region_display)
+                
+                # Si está expandida, agregar embalses
+                if region_name in regiones_expandidas:
+                    embalses = [d for d in participacion_complete if d.get('tipo') == 'embalse' and d.get('region_name') == region_name]
+                    current_view.extend(embalses)
+            elif item.get('tipo') == 'total':
+                current_view.append(item)
+        
+        # Verificar si el clic fue en una región válida
+        if row_id >= len(current_view):
+            return [], [], regiones_expandidas
+            
+        clicked_item = current_view[row_id]
+        if clicked_item.get('tipo') != 'region':
+            return [], [], regiones_expandidas
+            
+        region_name = clicked_item.get('region_name')
+        if not region_name:
+            return [], [], regiones_expandidas
+        
+        # Toggle el estado de la región
+        new_regiones_expandidas = regiones_expandidas.copy()
+        if region_name in new_regiones_expandidas:
+            new_regiones_expandidas.remove(region_name)
+        else:
+            new_regiones_expandidas.append(region_name)
+        
+        # Construir las vistas finales
+        def build_view(data_complete, expanded_regions):
+            view = []
+            for item in data_complete:
+                if item.get('tipo') == 'region':
+                    region_name = item.get('region_name')
+                    # Agregar región con flecha apropiada
+                    region_copy = item.copy()
+                    region_copy['nombre'] = f"🔽 {region_name}" if region_name in expanded_regions else f"▶️ {region_name}"
+                    view.append(region_copy)
+                    
+                    # Si está expandida, agregar embalses
+                    if region_name in expanded_regions:
+                        embalses = [d for d in data_complete if d.get('tipo') == 'embalse' and d.get('region_name') == region_name]
+                        view.extend(embalses)
+                elif item.get('tipo') == 'total':
+                    view.append(item)
+            return view
+        
+        final_participacion = build_view(participacion_complete, new_regiones_expandidas)
+        final_capacidad = build_view(capacidad_complete, new_regiones_expandidas)
+        
+        return final_participacion, final_capacidad, new_regiones_expandidas
+        
+    except Exception as e:
+        print(f"Error en toggle_region_expansion: {e}")
+        import traceback
+        traceback.print_exc()
+        return [], [], regiones_expandidas or []
+
+# Callback adicional para inicializar la vista de las tablas desde los stores
+@app.callback(
+    [Output("tabla-participacion-jerarquica", "data", allow_duplicate=True),
+     Output("tabla-capacidad-jerarquica", "data", allow_duplicate=True)],
+    [Input("participacion-jerarquica-data", "data"),
+     Input("capacidad-jerarquica-data", "data")],
+    [State("regiones-expandidas", "data")],
+    prevent_initial_call='initial_duplicate'
+)
+def update_tables_from_stores(participacion_complete, capacidad_complete, regiones_expandidas):
+    """Actualizar las tablas basándose en los stores y el estado de expansión - VERSIÓN SIMPLIFICADA"""
+    try:
+        if not participacion_complete or not capacidad_complete:
+            return [], []
+        
+        if not regiones_expandidas:
+            regiones_expandidas = []
+        
+        def build_simple_view(data_complete, expanded_regions):
+            view = []
+            for item in data_complete:
+                if item.get('tipo') == 'region':
+                    region_name = item.get('region_name')
+                    # Solo agregar regiones (contraídas inicialmente)
+                    region_copy = item.copy()
+                    region_copy['nombre'] = f"🔽 {region_name}" if region_name in expanded_regions else f"▶️ {region_name}"
+                    view.append(region_copy)
+                    
+                    # Si está expandida, agregar embalses
+                    if region_name in expanded_regions:
+                        embalses = [d for d in data_complete if d.get('tipo') == 'embalse' and d.get('region_name') == region_name]
+                        view.extend(embalses)
+                elif item.get('tipo') == 'total':
+                    view.append(item)
+            return view
+        
+        final_participacion = build_simple_view(participacion_complete, regiones_expandidas)
+        final_capacidad = build_simple_view(capacidad_complete, regiones_expandidas)
+        
+        return final_participacion, final_capacidad
+        
+    except Exception as e:
+        print(f"Error en update_tables_from_stores: {e}")
+        import traceback
+        traceback.print_exc()
+        return [], []
+
 # Callback adicional para cargar datos por defecto al iniciar la página
 @app.callback(
     Output("tab-content", "children", allow_duplicate=True),
@@ -702,7 +1355,7 @@ def update_content(n_clicks, rio, start_date, end_date, region):
     prevent_initial_call='initial_duplicate'
 )
 def load_default_data(start_date, end_date):
-    # Solo ejecutar si no hay interacción del usuario y las fechas están disponibles
+    """Cargar datos por defecto al inicializar la página"""
     if start_date and end_date:
         try:
             data = objetoAPI.request_data('AporCaudal', 'Rio', start_date, end_date)
@@ -718,16 +1371,13 @@ def load_default_data(start_date, end_date):
                 region_df = data.groupby(['Region', 'Date'])['Value'].sum().reset_index()
                 region_df = region_df[region_df['Region'].notna()]  # Filtrar regiones válidas
                 
-                # Obtener datos de embalses para todas las regiones con estructura jerárquica
-                regiones_totales, df_completo_embalses = get_tabla_regiones_embalses()
-                
                 return html.Div([
-                    html.H5("Contribución de caudal por región - Todas las regiones", className="text-center mb-3"),
+                    html.H5("🇨🇴 Contribución Energética por Región Hidrológica de Colombia", className="text-center mb-2"),
+                    html.P("Vista panorámica nacional: Series temporales comparativas de aportes de caudal por región hidrológica. Haga clic en cualquier punto para ver el detalle agregado diario de la región. Los datos incluyen todos los ríos monitoreados en el período seleccionado, agrupados por región para análisis comparativo nacional.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
                     dbc.Row([
                         dbc.Col(create_bar_chart(region_df, "Aportes por región - Todas las regiones"), md=12)
                     ]),
                     dcc.Store(id="region-data-store", data=data.to_dict('records')),
-                    dcc.Store(id="embalses-completo-data", data=df_completo_embalses.to_dict('records')),
                     dbc.Modal([
                         dbc.ModalHeader(dbc.ModalTitle(id="modal-title-dynamic", children="Detalle de datos hidrológicos"), close_button=True),
                         dbc.ModalBody([
@@ -737,12 +1387,139 @@ def load_default_data(start_date, end_date):
                     ], id="modal-rio-table", is_open=False, size="xl", backdrop=True, centered=True, style={"zIndex": 2000}),
                     html.Hr(),
                     html.H5("⚡ Capacidad Útil Diaria de Energía por Región Hidrológica", className="text-center mt-4 mb-2"),
-                    html.P("📋 Interfaz expandible: Cada región se puede plegar/desplegar para ver sus embalses constituyentes. Los totales incluyen la suma de todos los embalses por región con participación porcentual del sistema nacional.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
+                    html.P("📋 Interfaz jerárquica expandible: Haga clic en cualquier región para desplegar sus embalses. Cada región muestra dos tablas lado a lado con participación porcentual y capacidad detallada en GWh. Las flechas ▶️ indican regiones contraídas y 🔽 regiones expandidas.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
+                    
+                    # Las dos tablas lado a lado con estructura jerárquica expandible
                     dbc.Row([
                         dbc.Col([
-                            create_collapsible_regions_table()
-                        ], md=12)
-                    ])
+                            dbc.Card([
+                                dbc.CardHeader([
+                                    html.I(className="bi bi-pie-chart me-2", style={"color": "#667eea"}),
+                                    html.Strong("📊 Participación Porcentual por Región")
+                                ], style={"background": "linear-gradient(135deg, #e3f2fd 0%, #f3f4f6 100%)",
+                                         "border": "none", "borderRadius": "8px 8px 0 0"}),
+                                dbc.CardBody([
+                                    html.P("Distribución porcentual de la capacidad energética entre regiones y sus embalses. Haga clic en una región para expandir y ver sus embalses.", 
+                                          className="text-muted mb-3", style={"fontSize": "0.85rem"}),
+                                    dash_table.DataTable(
+                                        id="tabla-participacion-jerarquica",
+                                        data=[],  # Se llenará dinámicamente
+                                        columns=[
+                                            {"name": "Región / Embalse", "id": "nombre"},
+                                            {"name": "Participación (%)", "id": "participacion"}
+                                        ],
+                                        style_cell={
+                                            'textAlign': 'left',
+                                            'padding': '8px',
+                                            'fontFamily': 'Inter, Arial, sans-serif',
+                                            'fontSize': 13,
+                                            'backgroundColor': '#f8f9fa',
+                                            'border': '1px solid #dee2e6'
+                                        },
+                                        style_header={
+                                            'backgroundColor': '#667eea',
+                                            'color': 'white',
+                                            'fontWeight': 'bold',
+                                            'fontSize': 14,
+                                            'textAlign': 'center',
+                                            'border': '1px solid #5a6cf0'
+                                        },
+                                        style_data_conditional=[
+                                            {
+                                                'if': {'filter_query': '{tipo} = "region"'},
+                                                'backgroundColor': '#e3f2fd',
+                                                'fontWeight': 'bold',
+                                                'cursor': 'pointer',
+                                                'border': '2px solid #2196f3',
+                                                'transition': 'all 0.3s ease'
+                                            },
+                                            {
+                                                'if': {'filter_query': '{tipo} = "embalse"'},
+                                                'backgroundColor': '#f8f9fa',
+                                                'fontStyle': 'italic',
+                                                'paddingLeft': '24px',
+                                                'borderLeft': '3px solid #28a745'
+                                            },
+                                            {
+                                                'if': {'filter_query': '{nombre} = "TOTAL SISTEMA"'},
+                                                'backgroundColor': '#007bff',
+                                                'color': 'white',
+                                                'fontWeight': 'bold'
+                                            }
+                                        ],
+                                        page_action="none"
+                                    )
+                                ], className="p-3")
+                            ], className="card-modern h-100")
+                        ], md=6),
+                        
+                        dbc.Col([
+                            dbc.Card([
+                                dbc.CardHeader([
+                                    html.I(className="bi bi-battery-full me-2", style={"color": "#28a745"}),
+                                    html.Strong("🏭 Capacidad Detallada por Región")
+                                ], style={"background": "linear-gradient(135deg, #e8f5e8 0%, #f3f4f6 100%)",
+                                         "border": "none", "borderRadius": "8px 8px 0 0"}),
+                                dbc.CardBody([
+                                    html.P("Valores específicos de capacidad útil diaria en GWh por región y embalses. Haga clic en una región para expandir y ver sus embalses.", 
+                                          className="text-muted mb-3", style={"fontSize": "0.85rem"}),
+                                    dash_table.DataTable(
+                                        id="tabla-capacidad-jerarquica",
+                                        data=[],  # Se llenará dinámicamente
+                                        columns=[
+                                            {"name": "Región / Embalse", "id": "nombre"},
+                                            {"name": "Capacidad (GWh)", "id": "capacidad"}
+                                        ],
+                                        style_cell={
+                                            'textAlign': 'left',
+                                            'padding': '8px',
+                                            'fontFamily': 'Inter, Arial, sans-serif',
+                                            'fontSize': 13,
+                                            'backgroundColor': '#f8f9fa',
+                                            'border': '1px solid #dee2e6'
+                                        },
+                                        style_header={
+                                            'backgroundColor': '#28a745',
+                                            'color': 'white',
+                                            'fontWeight': 'bold',
+                                            'fontSize': 14,
+                                            'textAlign': 'center',
+                                            'border': '1px solid #218838'
+                                        },
+                                        style_data_conditional=[
+                                            {
+                                                'if': {'filter_query': '{tipo} = "region"'},
+                                                'backgroundColor': '#e8f5e8',
+                                                'fontWeight': 'bold',
+                                                'cursor': 'pointer',
+                                                'border': '2px solid #28a745',
+                                                'transition': 'all 0.3s ease'
+                                            },
+                                            {
+                                                'if': {'filter_query': '{tipo} = "embalse"'},
+                                                'backgroundColor': '#f8f9fa',
+                                                'fontStyle': 'italic',
+                                                'paddingLeft': '24px',
+                                                'borderLeft': '3px solid #007bff'
+                                            },
+                                            {
+                                                'if': {'filter_query': '{nombre} = "TOTAL SISTEMA"'},
+                                                'backgroundColor': '#007bff',
+                                                'color': 'white',
+                                                'fontWeight': 'bold'
+                                            }
+                                        ],
+                                        page_action="none"
+                                    )
+                                ], className="p-3")
+                            ], className="card-modern h-100")
+                        ], md=6)
+                    ], className="g-3"),
+                    
+                    # Stores para manejar los datos jerárquicos y estados de expansión
+                    dcc.Store(id="participacion-jerarquica-data", data=[]),
+                    dcc.Store(id="capacidad-jerarquica-data", data=[]),
+                    dcc.Store(id="regiones-expandidas", data=[])
                 ])
             else:
                 return dbc.Alert("No se pueden procesar los datos obtenidos.", color="warning", className="text-center")
@@ -750,41 +1527,6 @@ def load_default_data(start_date, end_date):
             return dbc.Alert(f"Error al cargar datos iniciales: {str(e)}", color="danger", className="text-center")
     
     return dbc.Alert("Cargando datos iniciales...", color="info", className="text-center")
-
-# --- Mover fuera: Callback para actualizar la tabla de capacidad útil de embalse de forma interactiva ---
-@app.callback(
-    [Output("tabla-capacidad-embalse", "data"), Output("tabla-participacion-embalse", "data")],
-    [Input("embalse-cap-dropdown", "value")],
-    [State("embalse-cap-data", "data"), State("participacion-data", "data")]
-)
-def update_tabla_capacidad_embalse(embalse, data_capacidad, data_participacion):
-    df_cap = pd.DataFrame(data_capacidad)
-    df_part = pd.DataFrame(data_participacion)
-    
-    if embalse:
-        # El dropdown usa embalses en mayúsculas, igual que la columna 'Embalse'
-        df_cap = df_cap[df_cap['Embalse'].str.upper() == embalse.upper()]
-        df_part = df_part[df_part['Embalse'].str.upper() == embalse.upper()]
-    
-    # Tabla de capacidad
-    records_cap = df_cap.to_dict('records')
-    if not df_cap.empty:
-        total = df_cap['Capacidad Útil Diaria (GWh)'].sum()
-        total_row = {col: '' for col in df_cap.columns}
-        total_row['Embalse'] = 'TOTAL'
-        total_row['Capacidad Útil Diaria (GWh)'] = round(total, 2)
-        records_cap.append(total_row)
-    
-    # Tabla de participación
-    records_part = df_part.to_dict('records')
-    if not df_part.empty:
-        # Para la tabla de participación, el total debe ser exactamente 100%
-        total_row_part = {col: '' for col in df_part.columns}
-        total_row_part['Embalse'] = 'TOTAL'
-        total_row_part['Participación (%)'] = 100.0
-        records_part.append(total_row_part)
-    
-    return records_cap, records_part
 
 # --- Función para calcular participación porcentual de embalses ---
 def get_participacion_embalses(df_embalses):
