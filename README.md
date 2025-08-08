@@ -1,4 +1,4 @@
-# Hidrolog-a_MME
+# Hidrologia_MME
 
 # Dashboard Energético XM - Colombia
 
@@ -35,7 +35,7 @@ Dashboard interactivo desarrollado con **Plotly Dash** para visualizar datos del
 1. **Clona el repositorio:**
 ```bash
 git clone https://github.com/MelissaCardona2003/Hidrolog-a_MME.git
-cd Hidrolog-a_MME
+cd Hidrologia_MME
 ```
 
 2. **Crea un entorno virtual:**
