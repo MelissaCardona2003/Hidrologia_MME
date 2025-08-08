@@ -10,8 +10,8 @@ import sys
 import os
 import time
 import traceback
-import pydataxm.pydataxm as pydataxm
-ReadDB = pydataxm.ReadDB
+# Use the installed pydataxm package instead of local module
+from pydataxm.pydataxm import ReadDB
 warnings.filterwarnings("ignore")
 
 # Inicializar la aplicación Dash con tema Bootstrap
@@ -2357,4 +2357,4 @@ def create_stats_summary(data):
     ])
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=8050)
+    app.run(debug=True, host="0.0.0.0", port=8051)
