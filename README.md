@@ -1,3 +1,5 @@
+# Hidrolog-a_MME
+
 # Dashboard Energético XM - Colombia
 
 ## 🚀 Descripción
@@ -15,138 +17,104 @@ Dashboard interactivo desarrollado con **Plotly Dash** para visualizar datos del
 - 📤 **Exportación de datos** a Excel
 - ⚡ **Alto rendimiento** y filtros en tiempo real
 
+## 🆕 Funcionalidades Nuevas
+
+### 📊 Tablas Jerárquicas Interactivas
+- **Ordenamiento automático** de mayor a menor valor
+- **Expansión/Compresión independiente** de regiones
+- **Botones integrados** (⊞/⊟) para control intuitivo
+- **Dos vistas simultáneas**: Participación porcentual y Capacidad detallada
+
+### 🔧 Mejoras Técnicas
+- **Callbacks optimizados** con `suppress_callback_exceptions=True`
+- **Sincronización perfecta** entre tabla visual y lógica de datos
+- **Interfaz completamente funcional** sin restricciones de orden
+
 ## 🛠️ Instalación
 
 1. **Clona el repositorio:**
-   ```bash
-   git clone <repository-url>
-   cd dashboard-energia-xm
-   ```
-
-2. **Instala las dependencias:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Ejecuta la aplicación:**
-   ```bash
-   python app.py
-   ```
-
-4. **Abre tu navegador** en: http://localhost:8050
-
-## 📊 Uso del Dashboard
-
-### 1. Selección de Métricas
-- **MetricId**: Elige la métrica que deseas consultar (ej: "Gene", "DemaCome", "PrecBolsNaci")
-- **Entity**: Selecciona la entidad de agregación (ej: "Sistema", "Recurso", "Agente")
-
-### 2. Rango de Fechas
-- **Fecha Inicio**: Fecha de inicio de la consulta
-- **Fecha Fin**: Fecha de fin de la consulta
-
-### 3. Visualizaciones Disponibles
-
-#### 📊 Tabla de Datos
-- Tabla interactiva con todos los datos consultados
-- Filtros por columna
-- Ordenamiento ascendente/descendente
-- Paginación automática
-- Exportación a Excel
-
-#### 📈 Gráfico de Líneas
-- Visualización temporal de las métricas
-- Ideal para analizar tendencias
-- Hover interactivo con detalles
-
-#### 📊 Gráfico de Barras
-- Distribución por categorías
-- Perfecto para comparar valores
-- Top 20 automático para mejor visualización
-
-#### 📋 Resumen Estadístico
-- Estadísticas descriptivas automáticas
-- Media, mediana, desviación estándar
-- Valores mínimos y máximos
-
-## 📈 Métricas Disponibles
-
-El dashboard puede consultar todas las métricas disponibles en la API XM, incluyendo:
-
-- **Generación**: Gene, GeneIdea, GeneProgDesp
-- **Demanda**: DemaCome, DemaMaxPot, DemaSIN
-- **Precios**: PrecBolsNaci, PrecEsca, PrecPromCont
-- **Aportes**: AporEner, AporCaudal, PorcApor
-- **Embalses**: VoluUtilDiarEner, CapaUtilDiarEner
-- **Intercambios**: ImpoEner, ExpoEner
-- **Y muchas más...**
-
-## 🔧 Dependencias Principales
-
-- **Dash**: Framework web interactivo
-- **Plotly**: Visualizaciones avanzadas
-- **Pandas**: Manipulación de datos
-- **pydataxm**: Cliente oficial para API XM
-- **Dash Bootstrap Components**: Componentes UI modernos
-
-## 🎯 Ejemplos de Uso
-
-### Consultar Generación Real del Sistema
-```python
-MetricId: "Gene"
-Entity: "Sistema"
-Fechas: 2025-01-01 a 2025-01-31
+```bash
+git clone https://github.com/MelissaCardona2003/Hidrolog-a_MME.git
+cd Hidrolog-a_MME
 ```
 
-### Analizar Precios de Bolsa
-```python
-MetricId: "PrecBolsNaci"
-Entity: "Sistema"
-Fechas: 2025-01-01 a 2025-01-31
+2. **Crea un entorno virtual:**
+```bash
+python -m venv .venv
+source .venv/bin/activate  # En Linux/Mac
+# .venv\Scripts\activate   # En Windows
 ```
 
-### Revisar Demanda Comercial por Agente
-```python
-MetricId: "DemaCome"
-Entity: "Agente"
-Fechas: 2025-01-01 a 2025-01-31
+3. **Instala las dependencias:**
+```bash
+pip install -r requirements.txt
 ```
 
-## 🚀 Características Técnicas
+4. **Ejecuta la aplicación:**
+```bash
+python app.py
+```
 
-- **Arquitectura**: Aplicación web basada en Dash
-- **Rendimiento**: Optimizado para grandes volúmenes de datos
-- **Compatibilidad**: Funciona en todos los navegadores modernos
-- **Responsivo**: Adaptable a dispositivos móviles y desktop
-- **API**: Integración completa con pydataxm
+5. **Abre tu navegador** y ve a: `http://localhost:8050`
 
-## 📱 Capturas de Pantalla
+## 📋 Requisitos del Sistema
 
-*[Aquí puedes agregar capturas de pantalla del dashboard]*
+- Python 3.8+
+- Conexión a Internet (para API de XM)
+- Navegador web moderno
 
-## 🤝 Contribuciones
+## 🔧 Configuración
+
+El archivo `config.py` contiene las configuraciones principales:
+- URL base de la API XM
+- Parámetros de conexión
+- Configuraciones de visualización
+
+## 📈 Uso
+
+1. **Selecciona fechas** usando los selectores de fecha de inicio y fin
+2. **Visualiza datos automáticamente** cargados en las tablas jerárquicas
+3. **Expande regiones** haciendo clic en los botones ⊞/⊟
+4. **Compara datos** entre participación porcentual y capacidad
+5. **Navega libremente** entre diferentes regiones sin restricciones
+
+## 🏗️ Estructura del Proyecto
+
+```
+Hidrolog-a_MME/
+├── app.py              # Aplicación principal
+├── config.py           # Configuraciones
+├── requirements.txt    # Dependencias
+├── install.sh         # Script de instalación
+├── API_XM/            # Módulo de la API XM
+├── README.md          # Este archivo
+└── .venv/             # Entorno virtual (generado)
+```
+
+## 🤝 Contribuir
 
 Las contribuciones son bienvenidas. Por favor:
 
-1. Fork el proyecto
-2. Crea una rama para tu feature
-3. Commit tus cambios
-4. Push a la rama
+1. Haz fork del repositorio
+2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit tus cambios (`git commit -am 'Agregar nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
 5. Abre un Pull Request
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
 
-## 📞 Soporte
+## 👥 Autores
 
-Para soporte y preguntas:
-- 📧 Email: [tu-email@ejemplo.com]
-- 🐛 Issues: [GitHub Issues]
-- 📖 Documentación API XM: https://www.xm.com.co/
+- **Melissa Cardona** - Desarrollo principal - [@MelissaCardona2003](https://github.com/MelissaCardona2003)
+
+## 🙏 Agradecimientos
+
+- Ministerio de Minas y Energía de Colombia
+- XM S.A. E.S.P. por proporcionar la API de datos
+- Comunidad de Plotly Dash por la documentación y recursos
 
 ---
 
-**Desarrollado con ❤️ para el sector energético colombiano**
-# Hidrolog-a_MME
-# Hidrolog-a_MME
+⚡ **Desarrollado para el Ministerio de Minas y Energía de Colombia** ⚡
