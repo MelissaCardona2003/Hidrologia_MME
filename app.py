@@ -10,21 +10,9 @@ import sys
 import os
 import time
 import traceback
-import logging
-from flask import jsonify
 # Use the installed pydataxm package instead of local module
 from pydataxm.pydataxm import ReadDB
 warnings.filterwarnings("ignore")
-
-# Configurar logging para producción
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s %(levelname)s %(name)s %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-logger = logging.getLogger(__name__)
 
 # Inicializar la aplicación Dash con tema Bootstrap
 
@@ -65,99 +53,6 @@ app = dash.Dash(__name__,
                     "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
                 ],
                 suppress_callback_exceptions=True)
-
-# Servidor para el despliegue
-server = app.server
-
-# Configurar manejo de errores robusto
-@server.errorhandler(500)
-def handle_internal_error(e):
-    logger.error(f"Internal server error: {str(e)}")
-    return jsonify({
-        'error': 'Error interno del servidor',
-        'message': 'La aplicación está experimentando problemas técnicos. Por favor intente nuevamente.',
-        'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
-        'status': 500
-    }), 500
-
-@server.errorhandler(404)
-def handle_not_found(e):
-    logger.warning(f"404 error: {str(e)}")
-    return jsonify({
-        'error': 'Página no encontrada',
-        'message': 'La página solicitada no existe.',
-        'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
-        'status': 404
-    }), 404
-
-@server.errorhandler(503)
-def handle_service_unavailable(e):
-    logger.error(f"Service unavailable: {str(e)}")
-    return jsonify({
-        'error': 'Servicio no disponible',
-        'message': 'El servicio está temporalmente no disponible. Por favor intente más tarde.',
-        'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
-        'status': 503
-    }), 503
-
-# Health check endpoint para monitoreo
-@server.route('/health')
-def health_check():
-    """Endpoint para verificar el estado de salud de la aplicación"""
-    try:
-        # Verificar conexión a API XM
-        api_status = "healthy" if objetoAPI is not None else "unhealthy"
-        
-        # Verificar memoria y recursos básicos
-        import psutil
-        memory_percent = psutil.virtual_memory().percent
-        cpu_percent = psutil.cpu_percent(interval=1)
-        
-        health_data = {
-            'status': 'healthy' if api_status == "healthy" and memory_percent < 90 and cpu_percent < 90 else 'unhealthy',
-            'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
-            'api_connection': api_status,
-            'memory_usage': f"{memory_percent:.1f}%",
-            'cpu_usage': f"{cpu_percent:.1f}%",
-            'uptime': time.time(),
-            'version': '1.0.0'
-        }
-        
-        status_code = 200 if health_data['status'] == 'healthy' else 503
-        logger.info(f"Health check: {health_data['status']}")
-        
-        return jsonify(health_data), status_code
-        
-    except Exception as e:
-        logger.error(f"Health check failed: {str(e)}")
-        return jsonify({
-            'status': 'unhealthy',
-            'reason': str(e),
-            'timestamp': time.strftime('%Y-%m-%d %H:%M:%S')
-        }), 503
-
-# Endpoint de información del sistema
-@server.route('/info')
-def system_info():
-    """Endpoint con información del sistema para monitoreo"""
-    try:
-        import psutil
-        return jsonify({
-            'application': 'Dashboard Hidrológico MME',
-            'version': '1.0.0',
-            'status': 'running',
-            'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
-            'last_update': LAST_UPDATE,
-            'system': {
-                'memory_usage': f"{psutil.virtual_memory().percent:.1f}%",
-                'cpu_usage': f"{psutil.cpu_percent(interval=1):.1f}%",
-                'disk_usage': f"{psutil.disk_usage('/').percent:.1f}%"
-            },
-            'api_status': 'connected' if objetoAPI is not None else 'disconnected'
-        })
-    except Exception as e:
-        logger.error(f"System info error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
 
 # Custom CSS para aplicar el estilo del Ministerio de Minas y Energía de Colombia
 app.index_string = '''
@@ -2460,10 +2355,6 @@ def create_stats_summary(data):
             )
         ])
     ])
-
-# Función principal para ejecutar la aplicación
-if __name__ == '__main__':
-    app.run_server(debug=False, host='0.0.0.0', port=8050)
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8051)
