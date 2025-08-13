@@ -10,21 +10,9 @@ import sys
 import os
 import time
 import traceback
-import logging
-from flask import jsonify
 # Use the installed pydataxm package instead of local module
 from pydataxm.pydataxm import ReadDB
 warnings.filterwarnings("ignore")
-
-# Configurar logging para producción
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s %(levelname)s %(name)s %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-logger = logging.getLogger(__name__)
 
 # Inicializar la aplicación Dash con tema Bootstrap
 
@@ -68,109 +56,6 @@ app = dash.Dash(__name__,
 
 # Servidor para el despliegue
 server = app.server
-
-# Configurar manejo de errores robusto
-@server.errorhandler(500)
-def handle_internal_error(e):
-    logger.error(f"Internal server error: {str(e)}")
-    return jsonify({
-        'error': 'Error interno del servidor',
-        'message': 'La aplicación está experimentando problemas técnicos. Por favor intente nuevamente.',
-        'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
-        'status': 500
-    }), 500
-
-@server.errorhandler(404)
-def handle_not_found(e):
-    logger.warning(f"404 error: {str(e)}")
-    return jsonify({
-        'error': 'Página no encontrada',
-        'message': 'La página solicitada no existe.',
-        'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
-        'status': 404
-    }), 404
-
-@server.errorhandler(503)
-def handle_service_unavailable(e):
-    logger.error(f"Service unavailable: {str(e)}")
-    return jsonify({
-        'error': 'Servicio no disponible',
-        'message': 'El servicio está temporalmente no disponible. Por favor intente más tarde.',
-        'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
-        'status': 503
-    }), 503
-
-# Health check endpoint para monitoreo
-@server.route('/health')
-def health_check():
-    """Endpoint para verificar el estado de salud de la aplicación"""
-    try:
-        # Verificar conexión a API XM
-        api_status = "healthy" if objetoAPI is not None else "unhealthy"
-        
-        # Verificar memoria y recursos básicos
-        try:
-            import psutil
-            memory_percent = psutil.virtual_memory().percent
-            cpu_percent = psutil.cpu_percent(interval=1)
-        except ImportError:
-            memory_percent = 0
-            cpu_percent = 0
-        
-        health_data = {
-            'status': 'healthy' if api_status == "healthy" and memory_percent < 90 and cpu_percent < 90 else 'unhealthy',
-            'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
-            'api_connection': api_status,
-            'memory_usage': f"{memory_percent:.1f}%" if memory_percent > 0 else "N/A",
-            'cpu_usage': f"{cpu_percent:.1f}%" if cpu_percent > 0 else "N/A",
-            'uptime': time.time(),
-            'version': '1.0.0'
-        }
-        
-        status_code = 200 if health_data['status'] == 'healthy' else 503
-        logger.info(f"Health check: {health_data['status']}")
-        
-        return jsonify(health_data), status_code
-        
-    except Exception as e:
-        logger.error(f"Health check failed: {str(e)}")
-        return jsonify({
-            'status': 'unhealthy',
-            'reason': str(e),
-            'timestamp': time.strftime('%Y-%m-%d %H:%M:%S')
-        }), 503
-
-# Endpoint de información del sistema
-@server.route('/info')
-def system_info():
-    """Endpoint con información del sistema para monitoreo"""
-    try:
-        try:
-            import psutil
-            memory_usage = f"{psutil.virtual_memory().percent:.1f}%"
-            cpu_usage = f"{psutil.cpu_percent(interval=1):.1f}%"
-            disk_usage = f"{psutil.disk_usage('/').percent:.1f}%"
-        except ImportError:
-            memory_usage = "N/A"
-            cpu_usage = "N/A"
-            disk_usage = "N/A"
-            
-        return jsonify({
-            'application': 'Dashboard Hidrológico MME',
-            'version': '1.0.0',
-            'status': 'running',
-            'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
-            'last_update': LAST_UPDATE,
-            'system': {
-                'memory_usage': memory_usage,
-                'cpu_usage': cpu_usage,
-                'disk_usage': disk_usage
-            },
-            'api_status': 'connected' if objetoAPI is not None else 'disconnected'
-        })
-    except Exception as e:
-        logger.error(f"System info error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
 
 # Custom CSS para aplicar el estilo del Ministerio de Minas y Energía de Colombia
 app.index_string = '''
@@ -810,109 +695,124 @@ def update_rio_options(region):
      State("region-dropdown", "value")]
 )
 def update_content(n_clicks, rio, start_date, end_date, region):
+    # Función auxiliar para mostrar la vista por defecto (panorámica nacional)
+    def show_default_view(start_date, end_date):
+        try:
+            data = objetoAPI.request_data('AporCaudal', 'Rio', start_date, end_date)
+            if data is None or data.empty:
+                return dbc.Alert("No se encontraron datos para mostrar.", color="warning")
+            
+            # Agregar información de región
+            data['Region'] = data['Name'].map(RIO_REGION)
+            
+            # Mostrar contribución total por región (todas las regiones)
+            if 'Name' in data.columns and 'Value' in data.columns:
+                # Agrupar por región y fecha para crear series temporales
+                region_df = data.groupby(['Region', 'Date'])['Value'].sum().reset_index()
+                region_df = region_df[region_df['Region'].notna()]  # Filtrar regiones válidas
+                
+                # Obtener datos de embalses para todas las regiones con estructura jerárquica
+                regiones_totales, df_completo_embalses = get_tabla_regiones_embalses()
+                
+                return html.Div([
+                    html.H5("🇨🇴 Contribución Energética por Región Hidrológica de Colombia", className="text-center mb-2"),
+                    html.P("Vista panorámica nacional: Series temporales comparativas de aportes de caudal por región hidrológica. Haga clic en cualquier punto para ver el detalle agregado diario de la región. Los datos incluyen todos los ríos monitoreados en el período seleccionado, agrupados por región para análisis comparativo nacional.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
+                    dbc.Row([
+                        dbc.Col(create_bar_chart(region_df, "Aportes por región - Todas las regiones"), md=12)
+                    ]),
+                    dcc.Store(id="region-data-store", data=data.to_dict('records')),
+                    dcc.Store(id="embalses-completo-data", data=df_completo_embalses.to_dict('records')),
+                    dbc.Modal([
+                        dbc.ModalHeader(dbc.ModalTitle(id="modal-title-dynamic", children="Detalle de datos hidrológicos"), close_button=True),
+                        dbc.ModalBody([
+                            html.Div(id="modal-description", className="mb-3", style={"fontSize": "0.9rem", "color": "#666"}),
+                            html.Div(id="modal-table-content")
+                        ]),
+                    ], id="modal-rio-table", is_open=False, size="xl", backdrop=True, centered=True, style={"zIndex": 2000}),
+                    html.Hr(),
+                    html.H5("⚡ Capacidad Útil Diaria de Energía por Región Hidrológica", className="text-center mt-4 mb-2"),
+                    html.P("📋 Interfaz jerárquica expandible: Haga clic en cualquier región para desplegar sus embalses. Cada región muestra dos tablas lado a lado con participación porcentual y capacidad detallada en GWh. Los datos están ordenados de mayor a menor valor. Los símbolos ⊞ indican regiones contraídas y ⊟ regiones expandidas.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
+                    dbc.Row([
+                        dbc.Col([
+                            dbc.Card([
+                                dbc.CardHeader([
+                                    html.I(className="bi bi-pie-chart me-2", style={"color": "#667eea"}),
+                                    html.Strong("📊 Participación Porcentual por Región")
+                                ], style={"background": "linear-gradient(135deg, #e3f2fd 0%, #f3f4f6 100%)",
+                                         "border": "none", "borderRadius": "8px 8px 0 0"}),
+                                dbc.CardBody([
+                                    html.P("Distribución porcentual de la capacidad energética entre regiones y sus embalses. Haga clic en los botones [+]/[-] para expandir/contraer cada región.", 
+                                          className="text-muted mb-3", style={"fontSize": "0.85rem"}),
+                                    html.Div([
+                                        # Botones superpuestos para cada región
+                                        html.Div(id="participacion-toggle-buttons", style={
+                                            'position': 'absolute', 
+                                            'zIndex': 10, 
+                                            'pointerEvents': 'none'
+                                        }),
+                                        # Tabla principal
+                                        html.Div(id="tabla-participacion-jerarquica-container", children=[
+                                            html.Div("Cargando datos...", className="text-center text-muted")
+                                        ])
+                                    ], style={'position': 'relative'})
+                                ], className="p-3")
+                            ], className="card-modern h-100")
+                        ], md=6),
+                        
+                        dbc.Col([
+                            dbc.Card([
+                                dbc.CardHeader([
+                                    html.I(className="bi bi-battery-full me-2", style={"color": "#28a745"}),
+                                    html.Strong("🏭 Capacidad Detallada por Región")
+                                ], style={"background": "linear-gradient(135deg, #e8f5e8 0%, #f3f4f6 100%)",
+                                         "border": "none", "borderRadius": "8px 8px 0 0"}),
+                                dbc.CardBody([
+                                    html.P("Valores específicos de capacidad útil diaria en GWh por región y embalses. Haga clic en los botones [+]/[-] para expandir/contraer cada región.", 
+                                          className="text-muted mb-3", style={"fontSize": "0.85rem"}),
+                                    html.Div([
+                                        # Botones superpuestos para cada región
+                                        html.Div(id="capacidad-toggle-buttons", style={
+                                            'position': 'absolute', 
+                                            'zIndex': 10, 
+                                            'pointerEvents': 'none'
+                                        }),
+                                        # Tabla principal
+                                        html.Div(id="tabla-capacidad-jerarquica-container", children=[
+                                            html.Div("Cargando datos...", className="text-center text-muted")
+                                        ])
+                                    ], style={'position': 'relative'})
+                                ], className="p-3")
+                            ], className="card-modern h-100")
+                        ], md=6)
+                    ], className="g-3"),
+                    
+                    # Stores para manejar los datos jerárquicos y estados de expansión
+                    dcc.Store(id="participacion-jerarquica-data", data=[]),
+                    dcc.Store(id="capacidad-jerarquica-data", data=[]),
+                    dcc.Store(id="regiones-expandidas", data=[])
+                ])
+            else:
+                return dbc.Alert("No se pueden procesar los datos obtenidos.", color="warning")
+        except Exception as e:
+            return dbc.Alert(f"Error al obtener datos por defecto: {str(e)}", color="danger")
+    
+    # Verificar si los filtros están vacíos o en valores por defecto
+    filtros_vacios = (
+        (region is None or region == "__ALL_REGIONS__") and 
+        (rio is None or rio == "__ALL__")
+    )
+    
+    # Si no se ha hecho clic, o faltan fechas, o todos los filtros están vacíos pero hay fechas
     if not n_clicks or not start_date or not end_date:
         # Mostrar datos por defecto de todas las regiones al cargar la página
         if start_date and end_date and not n_clicks:
-            try:
-                data = objetoAPI.request_data('AporCaudal', 'Rio', start_date, end_date)
-                if data is None or data.empty:
-                    return dbc.Alert("No se encontraron datos para mostrar.", color="warning")
-                
-                # Agregar información de región
-                data['Region'] = data['Name'].map(RIO_REGION)
-                
-                # Mostrar contribución total por región (todas las regiones)
-                if 'Name' in data.columns and 'Value' in data.columns:
-                    # Agrupar por región y fecha para crear series temporales
-                    region_df = data.groupby(['Region', 'Date'])['Value'].sum().reset_index()
-                    region_df = region_df[region_df['Region'].notna()]  # Filtrar regiones válidas
-                    
-                    # Obtener datos de embalses para todas las regiones con estructura jerárquica
-                    regiones_totales, df_completo_embalses = get_tabla_regiones_embalses()
-                    
-                    return html.Div([
-                        html.H5("🇨🇴 Contribución Energética por Región Hidrológica de Colombia", className="text-center mb-2"),
-                        html.P("Vista panorámica nacional: Series temporales comparativas de aportes de caudal por región hidrológica. Haga clic en cualquier punto para ver el detalle agregado diario de la región. Los datos incluyen todos los ríos monitoreados en el período seleccionado, agrupados por región para análisis comparativo nacional.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
-                        dbc.Row([
-                            dbc.Col(create_bar_chart(region_df, "Aportes por región - Todas las regiones"), md=12)
-                        ]),
-                        dcc.Store(id="region-data-store", data=data.to_dict('records')),
-                        dcc.Store(id="embalses-completo-data", data=df_completo_embalses.to_dict('records')),
-                        dbc.Modal([
-                            dbc.ModalHeader(dbc.ModalTitle(id="modal-title-dynamic", children="Detalle de datos hidrológicos"), close_button=True),
-                            dbc.ModalBody([
-                                html.Div(id="modal-description", className="mb-3", style={"fontSize": "0.9rem", "color": "#666"}),
-                                html.Div(id="modal-table-content")
-                            ]),
-                        ], id="modal-rio-table", is_open=False, size="xl", backdrop=True, centered=True, style={"zIndex": 2000}),
-                        html.Hr(),
-                        html.H5("⚡ Capacidad Útil Diaria de Energía por Región Hidrológica", className="text-center mt-4 mb-2"),
-                        html.P("📋 Interfaz jerárquica expandible: Haga clic en cualquier región para desplegar sus embalses. Cada región muestra dos tablas lado a lado con participación porcentual y capacidad detallada en GWh. Los datos están ordenados de mayor a menor valor. Los símbolos ⊞ indican regiones contraídas y ⊟ regiones expandidas.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
-                        dbc.Row([
-                            dbc.Col([
-                                dbc.Card([
-                                    dbc.CardHeader([
-                                        html.I(className="bi bi-pie-chart me-2", style={"color": "#667eea"}),
-                                        html.Strong("📊 Participación Porcentual por Región")
-                                    ], style={"background": "linear-gradient(135deg, #e3f2fd 0%, #f3f4f6 100%)",
-                                             "border": "none", "borderRadius": "8px 8px 0 0"}),
-                                    dbc.CardBody([
-                                        html.P("Distribución porcentual de la capacidad energética entre regiones y sus embalses. Haga clic en los botones [+]/[-] para expandir/contraer cada región.", 
-                                              className="text-muted mb-3", style={"fontSize": "0.85rem"}),
-                                        html.Div([
-                                            # Botones superpuestos para cada región
-                                            html.Div(id="participacion-toggle-buttons", style={
-                                                'position': 'absolute', 
-                                                'zIndex': 10, 
-                                                'pointerEvents': 'none'
-                                            }),
-                                            # Tabla principal
-                                            html.Div(id="tabla-participacion-jerarquica-container", children=[
-                                                html.Div("Cargando datos...", className="text-center text-muted")
-                                            ])
-                                        ], style={'position': 'relative'})
-                                    ], className="p-3")
-                                ], className="card-modern h-100")
-                            ], md=6),
-                            
-                            dbc.Col([
-                                dbc.Card([
-                                    dbc.CardHeader([
-                                        html.I(className="bi bi-battery-full me-2", style={"color": "#28a745"}),
-                                        html.Strong("🏭 Capacidad Detallada por Región")
-                                    ], style={"background": "linear-gradient(135deg, #e8f5e8 0%, #f3f4f6 100%)",
-                                             "border": "none", "borderRadius": "8px 8px 0 0"}),
-                                    dbc.CardBody([
-                                        html.P("Valores específicos de capacidad útil diaria en GWh por región y embalses. Haga clic en los botones [+]/[-] para expandir/contraer cada región.", 
-                                              className="text-muted mb-3", style={"fontSize": "0.85rem"}),
-                                        html.Div([
-                                            # Botones superpuestos para cada región
-                                            html.Div(id="capacidad-toggle-buttons", style={
-                                                'position': 'absolute', 
-                                                'zIndex': 10, 
-                                                'pointerEvents': 'none'
-                                            }),
-                                            # Tabla principal
-                                            html.Div(id="tabla-capacidad-jerarquica-container", children=[
-                                                html.Div("Cargando datos...", className="text-center text-muted")
-                                            ])
-                                        ], style={'position': 'relative'})
-                                    ], className="p-3")
-                                ], className="card-modern h-100")
-                            ], md=6)
-                        ], className="g-3"),
-                        
-                        # Stores para manejar los datos jerárquicos y estados de expansión
-                        dcc.Store(id="participacion-jerarquica-data", data=[]),
-                        dcc.Store(id="capacidad-jerarquica-data", data=[]),
-                        dcc.Store(id="regiones-expandidas", data=[])
-                    ])
-                else:
-                    return dbc.Alert("No se pueden procesar los datos obtenidos.", color="warning")
-            except Exception as e:
-                return dbc.Alert(f"Error al obtener datos por defecto: {str(e)}", color="danger")
+            return show_default_view(start_date, end_date)
         else:
             return dbc.Alert("Selecciona una región, fechas y/o río, luego haz clic en Consultar.", color="info", className="text-center")
+    
+    # Si se hizo clic pero todos los filtros están vacíos, mostrar vista por defecto
+    if filtros_vacios:
+        return show_default_view(start_date, end_date)
     
     try:
         data = objetoAPI.request_data('AporCaudal', 'Rio', start_date, end_date)
