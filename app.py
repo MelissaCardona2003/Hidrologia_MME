@@ -10,6 +10,7 @@ import sys
 import os
 import time
 import traceback
+from flask import Flask, jsonify
 # Use the installed pydataxm package instead of local module
 from pydataxm.pydataxm import ReadDB
 warnings.filterwarnings("ignore")
@@ -45,8 +46,13 @@ def format_date(date_value):
     else:
         return date_value
 
-# Inicializar la aplicación Dash con tema Bootstrap y estilos personalizados
+# Crear servidor Flask personalizado
+server = Flask(__name__)
+server.config['SECRET_KEY'] = 'hidrologia-mme-colombia-2025'
+
+# Inicializar la aplicación Dash con tema Bootstrap y servidor Flask personalizado
 app = dash.Dash(__name__, 
+                server=server,
                 external_stylesheets=[
                     dbc.themes.BOOTSTRAP, 
                     dbc.icons.BOOTSTRAP,
@@ -54,8 +60,58 @@ app = dash.Dash(__name__,
                 ],
                 suppress_callback_exceptions=True)
 
-# Servidor para el despliegue
-server = app.server
+# Rutas adicionales de Flask para endpoints de salud y API
+@server.route('/health')
+def health_check():
+    """Endpoint de salud para monitoreo"""
+    return jsonify({
+        'status': 'healthy',
+        'service': 'Dashboard Hidrológico MME',
+        'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
+        'version': '3.3'
+    }), 200
+
+@server.route('/api/status')
+def api_status():
+    """Endpoint de estado de la API XM"""
+    try:
+        # Verificar si la API XM está funcionando
+        if objetoAPI is not None:
+            # Hacer una consulta rápida para verificar conectividad
+            test_data = objetoAPI.request_data('ListadoRios', 'Sistema', '2024-01-01', '2024-01-02')
+            api_status = 'connected' if test_data is not None and not test_data.empty else 'disconnected'
+        else:
+            api_status = 'disconnected'
+        
+        return jsonify({
+            'status': 'ok',
+            'api_xm_status': api_status,
+            'timestamp': time.strftime('%Y-%m-%d %H:%M:%S')
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'api_xm_status': 'error',
+            'error': str(e),
+            'timestamp': time.strftime('%Y-%m-%d %H:%M:%S')
+        }), 500
+
+@server.route('/api/info')
+def app_info():
+    """Endpoint con información de la aplicación"""
+    return jsonify({
+        'name': 'Dashboard Hidrológico - MME Colombia',
+        'description': 'Sistema de Información Hidrológica del Ministerio de Minas y Energía',
+        'version': '3.3',
+        'last_update': LAST_UPDATE,
+        'author': 'Ministerio de Minas y Energía de Colombia',
+        'data_source': 'XM - Expertos en Mercados',
+        'endpoints': {
+            'health': '/health',
+            'api_status': '/api/status',
+            'app_info': '/api/info'
+        }
+    }), 200
 
 # Custom CSS para aplicar el estilo del Ministerio de Minas y Energía de Colombia
 app.index_string = '''
@@ -2376,4 +2432,25 @@ def create_stats_summary(data):
 
 # Función principal para ejecutar la aplicación
 if __name__ == '__main__':
-    app.run_server(debug=False, host='0.0.0.0', port=8050)
+    # Configuración para desarrollo
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    port = int(os.environ.get('PORT', 8050))
+    host = os.environ.get('HOST', '0.0.0.0')
+    
+    print(f"🚀 Iniciando Dashboard Hidrológico MME Colombia")
+    print(f"🌐 Servidor: http://{host}:{port}")
+    print(f"🔧 Debug: {debug_mode}")
+    print(f"📡 Endpoints disponibles:")
+    print(f"   - Dashboard: http://{host}:{port}")
+    print(f"   - Health Check: http://{host}:{port}/health")
+    print(f"   - API Status: http://{host}:{port}/api/status") 
+    print(f"   - App Info: http://{host}:{port}/api/info")
+    
+    # Ejecutar el servidor Dash-Flask
+    app.run_server(
+        debug=debug_mode, 
+        host=host, 
+        port=port,
+        dev_tools_hot_reload=debug_mode,
+        dev_tools_ui=debug_mode
+    )
