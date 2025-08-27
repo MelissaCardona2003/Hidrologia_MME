@@ -1,0 +1,243 @@
+/* Paleta de colores oficial del Ministerio de Minas y Energía */
+:root {
+    --mme-azul-principal: #003366;
+    --mme-azul-secundario: #0066cc;
+    --mme-azul-claro: #4da6ff;
+    --mme-verde-energia: #00b050;
+    --mme-verde-claro: #66d9a0;
+    --mme-blanco: #ffffff;
+    --mme-gris-claro: #f5f7fa;
+    --mme-gris-medio: #e8ecf0;
+    --mme-gris-texto: #2c3e50;
+    --mme-dorado: #ffd700;
+}
+body {
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
+    color: var(--mme-gris-texto);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+.main-container {
+    background: var(--mme-blanco);
+    border-radius: 15px;
+    box-shadow: 0 20px 60px rgba(0, 51, 102, 0.15);
+    margin: 20px auto;
+    padding: 40px;
+    max-width: 1400px;
+    animation: fadeInUp 0.8s ease-out;
+    border-top: 5px solid var(--mme-verde-energia);
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.header-mme {
+    background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
+    color: var(--mme-blanco);
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 25px rgba(0, 51, 102, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+.header-mme::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 150px;
+    height: 150px;
+    background: var(--mme-verde-energia);
+    opacity: 0.1;
+    border-radius: 50%;
+    transform: translate(50%, -50%);
+}
+.header-gradient {
+    background: linear-gradient(135deg, var(--mme-dorado) 0%, var(--mme-verde-energia) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+.card-mme {
+    border: none;
+    border-radius: 15px;
+    background: var(--mme-blanco);
+    box-shadow: 0 10px 30px rgba(0, 51, 102, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-left: 4px solid var(--mme-verde-energia);
+    overflow: hidden;
+}
+.card-mme:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 50px rgba(0, 51, 102, 0.15);
+    border-left-color: var(--mme-dorado);
+}
+.card-header-mme {
+    background: linear-gradient(135deg, var(--mme-gris-claro) 0%, var(--mme-gris-medio) 100%);
+    border: none;
+    padding: 20px 25px;
+    color: var(--mme-azul-principal);
+    font-weight: 600;
+    border-radius: 15px 15px 0 0;
+}
+.btn-mme {
+    background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
+    color: var(--mme-blanco);
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    padding: 12px 30px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 51, 102, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 14px;
+}
+.btn-mme:hover {
+    background: linear-gradient(135deg, var(--mme-verde-energia) 0%, var(--mme-verde-claro) 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 176, 80, 0.4);
+    color: var(--mme-blanco);
+}
+.btn-mme:focus {
+    box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.3);
+}
+.form-control-mme {
+    border: 2px solid var(--mme-gris-medio);
+    border-radius: 10px;
+    padding: 12px 18px;
+    transition: all 0.3s ease;
+    background: var(--mme-blanco);
+    font-size: 14px;
+}
+.form-control-mme:focus {
+    border-color: var(--mme-azul-secundario);
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+    background: var(--mme-gris-claro);
+}
+.table-mme {
+    background: var(--mme-blanco);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 51, 102, 0.08);
+}
+.table-mme thead {
+    background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
+    color: var(--mme-blanco);
+}
+.table-mme th {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 13px;
+    padding: 15px;
+    border: none;
+}
+.table-mme td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--mme-gris-medio);
+    vertical-align: middle;
+}
+.table-mme tbody tr:hover {
+    background-color: var(--mme-gris-claro);
+}
+.region-expandida {
+    background: linear-gradient(135deg, var(--mme-verde-energia) 0%, var(--mme-verde-claro) 100%);
+    color: var(--mme-blanco);
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.region-contraida {
+    background: linear-gradient(135deg, var(--mme-azul-claro) 0%, var(--mme-azul-secundario) 100%);
+    color: var(--mme-blanco);
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.embalse-item {
+    background: var(--mme-gris-claro);
+    border-left: 3px solid var(--mme-verde-energia);
+    padding: 8px 15px;
+    margin-left: 20px;
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    color: var(--mme-gris-texto);
+}
+.alert-mme {
+    border: none;
+    border-radius: 10px;
+    padding: 20px;
+    font-weight: 500;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+.alert-info-mme {
+    background: linear-gradient(135deg, rgba(0, 102, 204, 0.1) 0%, rgba(77, 166, 255, 0.1) 100%);
+    color: var(--mme-azul-principal);
+    border-left: 4px solid var(--mme-azul-secundario);
+}
+.alert-success-mme {
+    background: linear-gradient(135deg, rgba(0, 176, 80, 0.1) 0%, rgba(102, 217, 160, 0.1) 100%);
+    color: var(--mme-verde-energia);
+    border-left: 4px solid var(--mme-verde-energia);
+}
+.brand-mme {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.brand-mme .logo {
+    width: 60px;
+    height: 60px;
+    background: var(--mme-verde-energia);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mme-blanco);
+    font-size: 24px;
+    font-weight: bold;
+}
+.loading-mme {
+    background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
+}
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--mme-gris-claro);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, var(--mme-verde-energia) 0%, var(--mme-verde-claro) 100%);
+}
+@media (max-width: 768px) {
+    .main-container {
+        margin: 10px;
+        padding: 20px;
+        border-radius: 10px;
+    }
+    .header-mme {
+        padding: 20px;
+        text-align: center;
+    }
+    .brand-mme {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+}

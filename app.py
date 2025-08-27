@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, Input, Output, State, dash_table, ALL
+from dash import dcc, html, Input, Output, State, dash_table, ALL, callback
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
@@ -56,7 +56,8 @@ app = dash.Dash(__name__,
                 external_stylesheets=[
                     dbc.themes.BOOTSTRAP, 
                     dbc.icons.BOOTSTRAP,
-                    "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+                    "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap",
+                    "/assets/mme-style.css"
                 ],
                 suppress_callback_exceptions=True)
 
@@ -114,361 +115,7 @@ def app_info():
     }), 200
 
 # Custom CSS para aplicar el estilo del Ministerio de Minas y Energía de Colombia
-app.index_string = '''
-<!DOCTYPE html>
-<html>
-    <head>
-        {%metas%}
-        <title>{%title%}</title>
-        {%favicon%}
-        {%css%}
-        <style>
-            /* Paleta de colores oficial del Ministerio de Minas y Energía */
-            :root {
-                --mme-azul-principal: #003366;    /* Azul institucional principal */
-                --mme-azul-secundario: #0066cc;   /* Azul secundario */
-                --mme-azul-claro: #4da6ff;       /* Azul claro */
-                --mme-verde-energia: #00b050;     /* Verde energético */
-                --mme-verde-claro: #66d9a0;      /* Verde claro */
-                --mme-blanco: #ffffff;            /* Blanco institucional */
-                --mme-gris-claro: #f5f7fa;       /* Gris claro de fondo */
-                --mme-gris-medio: #e8ecf0;       /* Gris medio */
-                --mme-gris-texto: #2c3e50;       /* Gris para texto */
-                --mme-dorado: #ffd700;           /* Dorado para acentos */
-            }
-            
-            body {
-                font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
-                color: var(--mme-gris-texto);
-                min-height: 100vh;
-                margin: 0;
-                padding: 0;
-            }
-            
-            .main-container {
-                background: var(--mme-blanco);
-                border-radius: 15px;
-                box-shadow: 0 20px 60px rgba(0, 51, 102, 0.15);
-                margin: 20px auto;
-                padding: 40px;
-                max-width: 1400px;
-                animation: fadeInUp 0.8s ease-out;
-                border-top: 5px solid var(--mme-verde-energia);
-            }
-            
-            @keyframes fadeInUp {
-                from { 
-                    opacity: 0; 
-                    transform: translateY(40px); 
-                }
-                to { 
-                    opacity: 1; 
-                    transform: translateY(0); 
-                }
-            }
-            
-            /* Header oficial del MinEnergía */
-            .header-mme {
-                background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
-                color: var(--mme-blanco);
-                border-radius: 12px;
-                padding: 30px;
-                margin-bottom: 30px;
-                box-shadow: 0 8px 25px rgba(0, 51, 102, 0.2);
-                position: relative;
-                overflow: hidden;
-            }
-            
-            .header-mme::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                right: 0;
-                width: 150px;
-                height: 150px;
-                background: var(--mme-verde-energia);
-                opacity: 0.1;
-                border-radius: 50%;
-                transform: translate(50%, -50%);
-            }
-            
-            .header-gradient {
-                background: linear-gradient(135deg, var(--mme-dorado) 0%, var(--mme-verde-energia) 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-                font-weight: 700;
-                margin-bottom: 10px;
-            }
-            
-            /* Tarjetas con estilo institucional */
-            .card-mme {
-                border: none;
-                border-radius: 15px;
-                background: var(--mme-blanco);
-                box-shadow: 0 10px 30px rgba(0, 51, 102, 0.08);
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                border-left: 4px solid var(--mme-verde-energia);
-                overflow: hidden;
-            }
-            
-            .card-mme:hover {
-                transform: translateY(-8px);
-                box-shadow: 0 20px 50px rgba(0, 51, 102, 0.15);
-                border-left-color: var(--mme-dorado);
-            }
-            
-            .card-header-mme {
-                background: linear-gradient(135deg, var(--mme-gris-claro) 0%, var(--mme-gris-medio) 100%);
-                border: none;
-                padding: 20px 25px;
-                color: var(--mme-azul-principal);
-                font-weight: 600;
-                border-radius: 15px 15px 0 0;
-            }
-            
-            /* Botones con estilo gubernamental */
-            .btn-mme {
-                background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
-                color: var(--mme-blanco);
-                border: none;
-                border-radius: 10px;
-                font-weight: 600;
-                padding: 12px 30px;
-                transition: all 0.3s ease;
-                box-shadow: 0 4px 15px rgba(0, 51, 102, 0.3);
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                font-size: 14px;
-            }
-            
-            .btn-mme:hover {
-                background: linear-gradient(135deg, var(--mme-verde-energia) 0%, var(--mme-verde-claro) 100%);
-                transform: translateY(-3px);
-                box-shadow: 0 8px 25px rgba(0, 176, 80, 0.4);
-                color: var(--mme-blanco);
-            }
-            
-            .btn-mme:focus {
-                box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.3);
-            }
-            
-            /* Controles de formulario */
-            .form-control-mme {
-                border: 2px solid var(--mme-gris-medio);
-                border-radius: 10px;
-                padding: 12px 18px;
-                transition: all 0.3s ease;
-                background: var(--mme-blanco);
-                font-size: 14px;
-            }
-            
-            .form-control-mme:focus {
-                border-color: var(--mme-azul-secundario);
-                box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
-                background: var(--mme-gris-claro);
-            }
-            
-            /* Tablas con estilo institucional */
-            .table-mme {
-                background: var(--mme-blanco);
-                border-radius: 10px;
-                overflow: hidden;
-                box-shadow: 0 5px 15px rgba(0, 51, 102, 0.08);
-            }
-            
-            .table-mme thead {
-                background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
-                color: var(--mme-blanco);
-            }
-            
-            .table-mme th {
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                font-size: 13px;
-                padding: 15px;
-                border: none;
-            }
-            
-            .table-mme td {
-                padding: 12px 15px;
-                border-bottom: 1px solid var(--mme-gris-medio);
-                vertical-align: middle;
-            }
-            
-            .table-mme tbody tr:hover {
-                background-color: var(--mme-gris-claro);
-            }
-            
-            /* Indicadores de estado con colores oficiales */
-            .region-expandida {
-                background: linear-gradient(135deg, var(--mme-verde-energia) 0%, var(--mme-verde-claro) 100%);
-                color: var(--mme-blanco);
-                border-radius: 8px;
-                padding: 10px 15px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
-            }
-            
-            .region-contraida {
-                background: linear-gradient(135deg, var(--mme-azul-claro) 0%, var(--mme-azul-secundario) 100%);
-                color: var(--mme-blanco);
-                border-radius: 8px;
-                padding: 10px 15px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
-            }
-            
-            .embalse-item {
-                background: var(--mme-gris-claro);
-                border-left: 3px solid var(--mme-verde-energia);
-                padding: 8px 15px;
-                margin-left: 20px;
-                border-radius: 0 8px 8px 0;
-                font-style: italic;
-                color: var(--mme-gris-texto);
-            }
-            
-            /* Alertas con estilo gubernamental */
-            .alert-mme {
-                border: none;
-                border-radius: 10px;
-                padding: 20px;
-                font-weight: 500;
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            }
-            
-            .alert-info-mme {
-                background: linear-gradient(135deg, rgba(0, 102, 204, 0.1) 0%, rgba(77, 166, 255, 0.1) 100%);
-                color: var(--mme-azul-principal);
-                border-left: 4px solid var(--mme-azul-secundario);
-            }
-            
-            .alert-success-mme {
-                background: linear-gradient(135deg, rgba(0, 176, 80, 0.1) 0%, rgba(102, 217, 160, 0.1) 100%);
-                color: var(--mme-verde-energia);
-                border-left: 4px solid var(--mme-verde-energia);
-            }
-            
-            /* Logo y branding */
-            .brand-mme {
-                display: flex;
-                align-items: center;
-                gap: 15px;
-                margin-bottom: 20px;
-            }
-            
-            .brand-mme .logo {
-                width: 60px;
-                height: 60px;
-                background: var(--mme-verde-energia);
-                border-radius: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: var(--mme-blanco);
-                font-size: 24px;
-                font-weight: bold;
-            }
-            
-            /* Efectos de carga */
-            .loading-mme {
-                background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
-            }
-            
-            /* Scroll personalizado */
-            ::-webkit-scrollbar {
-                width: 8px;
-            }
-            
-            ::-webkit-scrollbar-track {
-                background: var(--mme-gris-claro);
-                border-radius: 4px;
-            }
-            
-            ::-webkit-scrollbar-thumb {
-                background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
-                border-radius: 4px;
-            }
-            
-            ::-webkit-scrollbar-thumb:hover {
-                background: linear-gradient(135deg, var(--mme-verde-energia) 0%, var(--mme-verde-claro) 100%);
-            }
-            
-            /* Header oficial del Ministerio de Minas y Energía */
-            .header-mme {
-                background: linear-gradient(135deg, var(--mme-azul-principal) 0%, var(--mme-azul-secundario) 100%);
-                padding: 30px 40px;
-                border-radius: 20px;
-                box-shadow: 0 8px 32px rgba(0, 51, 102, 0.3);
-                margin-bottom: 30px;
-                border: 1px solid rgba(255, 255, 255, 0.1);
-            }
-
-            .brand-mme {
-                display: flex;
-                align-items: center;
-                gap: 25px;
-            }
-
-            .brand-mme .logo {
-                background: rgba(255, 255, 255, 0.15);
-                padding: 20px;
-                border-radius: 50%;
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-            }
-
-            .brand-mme .logo i {
-                color: #ffffff;
-                display: block;
-                text-align: center;
-            }
-
-            .header-gradient {
-                background: linear-gradient(45deg, #ffffff, #f0f8ff);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-                font-weight: 700;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-            }
-            
-            /* Responsivo */
-            @media (max-width: 768px) {
-                .main-container {
-                    margin: 10px;
-                    padding: 20px;
-                    border-radius: 10px;
-                }
-                
-                .header-mme {
-                    padding: 20px;
-                    text-align: center;
-                }
-                
-                .brand-mme {
-                    flex-direction: column;
-                    gap: 15px;
-                    text-align: center;
-                }
-            }
-        </style>
-    </head>
-    <body>
-        {%app_entry%}
-        <footer>
-            {%config%}
-            {%scripts%}
-            {%renderer%}
-        </footer>
-    </body>
-</html>
-'''
+## Se ha eliminado el uso de app.index_string y el paradigma de index_string, manteniendo el resto del código igual.
 
 app.title = "Dashboard Hidrológico - Ministerio de Minas y Energía de Colombia"
 
@@ -709,13 +356,22 @@ app.layout = html.Div([
                 ], className="card-modern")
             ], width=12)
         ])
-    ], className="main-container", fluid=True)
+    ], className="main-container", fluid=True),
+    
+    # Modal global para todas las tablas de datos
+    dbc.Modal([
+        dbc.ModalHeader(dbc.ModalTitle(id="modal-title-dynamic", children="Detalle de datos hidrológicos"), close_button=True),
+        dbc.ModalBody([
+            html.Div(id="modal-description", className="mb-3", style={"fontSize": "0.9rem", "color": "#666"}),
+            html.Div(id="modal-table-content")
+        ]),
+    ], id="modal-rio-table", is_open=False, size="xl", backdrop=True, centered=True, style={"zIndex": 2000})
 ], style={"background": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", "minHeight": "100vh"})
 
 
 # Mostrar ríos en el dashboard al hacer clic en el botón
 # Callback para actualizar ríos según región seleccionada
-@app.callback(
+@callback(
     Output("rio-dropdown", "options"),
     [Input("region-dropdown", "value")]
 )
@@ -742,7 +398,7 @@ def update_rio_options(region):
 
 
 # Callback principal para consultar y mostrar datos filtrando por río y fechas
-@app.callback(
+@callback(
     Output("tab-content", "children"),
     [Input("query-button", "n_clicks")],
     [State("rio-dropdown", "value"),
@@ -774,17 +430,10 @@ def update_content(n_clicks, rio, start_date, end_date, region):
                     html.H5("🇨🇴 Contribución Energética por Región Hidrológica de Colombia", className="text-center mb-2"),
                     html.P("Vista panorámica nacional: Series temporales comparativas de aportes de caudal por región hidrológica. Haga clic en cualquier punto para ver el detalle agregado diario de la región. Los datos incluyen todos los ríos monitoreados en el período seleccionado, agrupados por región para análisis comparativo nacional.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
                     dbc.Row([
-                        dbc.Col(create_bar_chart(region_df, "Aportes por región - Todas las regiones"), md=12)
+                        dbc.Col(create_total_timeline_chart(data, "Aportes totales nacionales"), md=12)
                     ]),
                     dcc.Store(id="region-data-store", data=data.to_dict('records')),
                     dcc.Store(id="embalses-completo-data", data=df_completo_embalses.to_dict('records')),
-                    dbc.Modal([
-                        dbc.ModalHeader(dbc.ModalTitle(id="modal-title-dynamic", children="Detalle de datos hidrológicos"), close_button=True),
-                        dbc.ModalBody([
-                            html.Div(id="modal-description", className="mb-3", style={"fontSize": "0.9rem", "color": "#666"}),
-                            html.Div(id="modal-table-content")
-                        ]),
-                    ], id="modal-rio-table", is_open=False, size="xl", backdrop=True, centered=True, style={"zIndex": 2000}),
                     html.Hr(),
                     html.H5("⚡ Capacidad Útil Diaria de Energía por Región Hidrológica", className="text-center mt-4 mb-2"),
                     html.P("📋 Interfaz jerárquica expandible: Haga clic en cualquier región para desplegar sus embalses. Cada región muestra dos tablas lado a lado con participación porcentual y capacidad detallada en GWh. Los datos están ordenados de mayor a menor valor. Los símbolos ⊞ indican regiones contraídas y ⊟ regiones expandidas.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
@@ -941,16 +590,9 @@ def update_content(n_clicks, rio, start_date, end_date, region):
                     html.H5("🇨🇴 Contribución Energética por Región Hidrológica de Colombia", className="text-center mb-2"),
                     html.P("Vista panorámica nacional: Series temporales comparativas de aportes de caudal por región hidrológica. Haga clic en cualquier punto para ver el detalle agregado diario de la región. Los datos incluyen todos los ríos monitoreados en el período seleccionado, agrupados por región para análisis comparativo nacional.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
                     dbc.Row([
-                        dbc.Col(create_bar_chart(region_df, "Aportes por región - Todas las regiones"), md=12)
+                        dbc.Col(create_total_timeline_chart(data, "Aportes totales nacionales"), md=12)
                     ]),
                     dcc.Store(id="region-data-store", data=data.to_dict('records')),
-                    dbc.Modal([
-                        dbc.ModalHeader(dbc.ModalTitle(id="modal-title-dynamic", children="Detalle de datos hidrológicos"), close_button=True),
-                        dbc.ModalBody([
-                            html.Div(id="modal-description", className="mb-3", style={"fontSize": "0.9rem", "color": "#666"}),
-                            html.Div(id="modal-table-content")
-                        ]),
-                    ], id="modal-rio-table", is_open=False, size="xl", backdrop=True, centered=True, style={"zIndex": 2000}),
                     html.Hr(),
                 ])
             
@@ -1005,13 +647,6 @@ def update_content(n_clicks, rio, start_date, end_date, region):
                     dbc.Col(create_bar_chart(bar_df, f"Aportes por río {title_suffix}"), md=12)
                 ]),
                 dcc.Store(id="region-data-store", data=data_filtered.to_dict('records')),
-                dbc.Modal([
-                    dbc.ModalHeader(dbc.ModalTitle(id="modal-title-dynamic", children="Detalle de datos hidrológicos"), close_button=True),
-                    dbc.ModalBody([
-                        html.Div(id="modal-description", className="mb-3", style={"fontSize": "0.9rem", "color": "#666"}),
-                        html.Div(id="modal-table-content")
-                    ]),
-                ], id="modal-rio-table", is_open=False, size="xl", backdrop=True, centered=True, style={"zIndex": 2000}),
                 html.Hr(),
                 html.H5(f"⚡ Capacidad Útil Diaria de Energía - Embalses {title_suffix}", className="text-center mt-4 mb-2"),
                 html.P(f"Análisis detallado de la capacidad energética por embalse. Los datos muestran la energía disponible en GWh que puede ser generada diariamente por cada embalse. Incluye participación porcentual y filtros interactivos.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
@@ -1080,7 +715,7 @@ def update_content(n_clicks, rio, start_date, end_date, region):
         return dbc.Alert(f"Error al consultar los datos: {str(e)}", color="danger")
 
 # Callback para inicializar las tablas jerárquicas al cargar la página
-@app.callback(
+@callback(
     [Output("participacion-jerarquica-data", "data"),
      Output("capacidad-jerarquica-data", "data")],
     [Input("start-date", "date"), Input("end-date", "date")],
@@ -1347,7 +982,7 @@ def build_hierarchical_table_view(data_complete, expanded_regions, view_type="pa
     )
 
 # Callback para manejar clics en las regiones y expandir/colapsar embalses
-@app.callback(
+@callback(
     [Output("tabla-participacion-jerarquica-container", "children"),
      Output("tabla-capacidad-jerarquica-container", "children"),
      Output("regiones-expandidas", "data")],
@@ -1413,7 +1048,7 @@ def toggle_region_from_table(active_cell_part, active_cell_cap, participacion_co
         return dash.no_update, dash.no_update, regiones_expandidas or []
 
 # Callback para inicializar las vistas HTML desde los stores
-@app.callback(
+@callback(
     [Output("tabla-participacion-jerarquica-container", "children", allow_duplicate=True),
      Output("tabla-capacidad-jerarquica-container", "children", allow_duplicate=True)],
     [Input("participacion-jerarquica-data", "data"),
@@ -1453,7 +1088,7 @@ def update_html_tables_from_stores(participacion_complete, capacidad_complete, r
         return [], []
 
 # Callback adicional para cargar datos por defecto al iniciar la página
-@app.callback(
+@callback(
     Output("tab-content", "children", allow_duplicate=True),
     [Input("start-date", "date"), Input("end-date", "date")],
     prevent_initial_call='initial_duplicate'
@@ -1477,18 +1112,11 @@ def load_default_data(start_date, end_date):
                 
                 return html.Div([
                     html.H5("🇨🇴 Contribución Energética por Región Hidrológica de Colombia", className="text-center mb-2"),
-                    html.P("Vista panorámica nacional: Series temporales comparativas de aportes de caudal por región hidrológica. Haga clic en cualquier punto para ver el detalle agregado diario de la región. Los datos incluyen todos los ríos monitoreados en el período seleccionado, agrupados por región para análisis comparativo nacional.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
+                    html.P("Vista panorámica nacional: Timeline del total nacional de aportes de caudal. Haga clic en cualquier punto para ver el desglose detallado por región para esa fecha específica. Los datos incluyen todos los ríos monitoreados en el período seleccionado, agregados por día.", className="text-center text-muted mb-3", style={"fontSize": "0.9rem"}),
                     dbc.Row([
-                        dbc.Col(create_bar_chart(region_df, "Aportes por región - Todas las regiones"), md=12)
+                        dbc.Col(create_total_timeline_chart(data, "Aportes totales nacionales"), md=12)
                     ]),
                     dcc.Store(id="region-data-store", data=data.to_dict('records')),
-                    dbc.Modal([
-                        dbc.ModalHeader(dbc.ModalTitle(id="modal-title-dynamic", children="Detalle de datos hidrológicos"), close_button=True),
-                        dbc.ModalBody([
-                            html.Div(id="modal-description", className="mb-3", style={"fontSize": "0.9rem", "color": "#666"}),
-                            html.Div(id="modal-table-content")
-                        ]),
-                    ], id="modal-rio-table", is_open=False, size="xl", backdrop=True, centered=True, style={"zIndex": 2000}),
                     html.Hr(),
                 ])
             else:
@@ -1881,7 +1509,7 @@ def create_collapsible_regions_table():
 
 
 # Callback elegante para manejar el pliegue/despliegue de regiones
-@app.callback(
+@callback(
     [Output({"type": "collapse-region", "index": dash.dependencies.MATCH}, "is_open"),
      Output({"type": "chevron-region", "index": dash.dependencies.MATCH}, "className")],
     [Input({"type": "toggle-region", "index": dash.dependencies.MATCH}, "n_clicks")],
@@ -2231,168 +1859,251 @@ def create_bar_chart(data, metric_name):
             html.Small("Haz clic en cualquier punto para ver detalles", className="text-muted")
         ]),
         dbc.CardBody([
-            dcc.Graph(id="bar-rio-graph", figure=fig, clear_on_unhover=True)
+            dcc.Graph(id="rio-detail-graph", figure=fig, clear_on_unhover=True)
+        ], className="p-2")
+    ], className="card-modern chart-container shadow-lg")
+
+def create_total_timeline_chart(data, metric_name):
+    """Crear gráfico de línea temporal con total nacional por día"""
+    if data is None or data.empty:
+        return dbc.Alert("No se pueden crear gráficos con estos datos.", 
+                        color="warning", className="alert-modern")
+    
+    # Verificar que tengamos las columnas necesarias
+    if 'Date' not in data.columns or 'Value' not in data.columns:
+        return dbc.Alert("No se encuentran las columnas necesarias (Date, Value).", 
+                        color="warning", className="alert-modern")
+    
+    # Agrupar por fecha y sumar todos los valores de todas las regiones
+    daily_totals = data.groupby('Date')['Value'].sum().reset_index()
+    daily_totals = daily_totals.sort_values('Date')
+    
+    # Crear gráfico de línea con una sola línea negra
+    fig = px.line(
+        daily_totals,
+        x='Date',
+        y='Value',
+        title="Total Nacional de Aportes de Caudal por Día",
+        labels={'Value': "Total Energía (GWh)", 'Date': "Fecha"},
+        markers=True
+    )
+    
+    # Estilo moderno con línea negra
+    fig.update_layout(
+        height=500,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(family="Inter, Arial, sans-serif", size=12),
+        title=dict(
+            font_size=16,
+            x=0.5,
+            xanchor='center',
+            font_color='#2d3748'
+        ),
+        xaxis=dict(
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(128,128,128,0.2)',
+            showline=True,
+            linewidth=2,
+            linecolor='rgba(128,128,128,0.3)',
+            title="Fecha"
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(128,128,128,0.2)',
+            showline=True,
+            linewidth=2,
+            linecolor='rgba(128,128,128,0.3)',
+            title="Total Energía (GWh)"
+        ),
+        showlegend=False
+    )
+    
+    # Aplicar línea negra con marcadores
+    fig.update_traces(
+        line=dict(width=3, color='black'),
+        marker=dict(size=8, color='black', 
+                   line=dict(width=2, color='white')),
+        hovertemplate='<b>Fecha:</b> %{x}<br><b>Total Nacional:</b> %{y:.2f} GWh<extra></extra>'
+    )
+    
+    return dbc.Card([
+        dbc.CardHeader([
+            html.Div([
+                html.I(className="bi bi-graph-up me-2", style={"color": "#000"}),
+                html.Strong("Total Nacional por Día", style={"fontSize": "1.2rem"})
+            ], className="d-flex align-items-center"),
+            html.Small("Haz clic en cualquier punto para ver detalles por región", className="text-muted")
+        ]),
+        dbc.CardBody([
+            dcc.Graph(id="total-timeline-graph", figure=fig, clear_on_unhover=True)
         ], className="p-2")
     ], className="card-modern chart-container shadow-lg")
 # Callback para mostrar el modal con la tabla diaria al hacer click en un punto de la línea
-@app.callback(
+@callback(
     [Output("modal-rio-table", "is_open"), Output("modal-table-content", "children"), 
      Output("modal-title-dynamic", "children"), Output("modal-description", "children")],
-    [Input("bar-rio-graph", "clickData"), Input("modal-rio-table", "is_open")],
-    [State("region-data-store", "data")]
+    [Input("total-timeline-graph", "clickData"), Input("modal-rio-table", "is_open")],
+    [State("region-data-store", "data")],
+    prevent_initial_call=True
 )
-def show_modal_table(clickData, is_open, region_data):
+def show_modal_table(timeline_clickData, is_open, region_data):
     ctx = dash.callback_context
-    # Si se hace click en un punto de la línea, mostrar el modal con la tabla
-    if ctx.triggered and ctx.triggered[0]["prop_id"].startswith("bar-rio-graph") and clickData:
+    
+    print(f"🚀 CALLBACK EJECUTADO! Triggered: {[prop['prop_id'] for prop in ctx.triggered]}")
+    print(f" Timeline click data: {timeline_clickData}")
+    
+    # Determinar qué fue clicado
+    clickData = None
+    graph_type = None
+    
+    if ctx.triggered:
+        trigger_id = ctx.triggered[0]["prop_id"]
+        print(f"🔍 DEBUG: Callback triggered - trigger_id: {trigger_id}")
+        
+        if trigger_id.startswith("total-timeline-graph") and timeline_clickData:
+            clickData = timeline_clickData
+            graph_type = "timeline"
+            print(f"🎯 DEBUG: Timeline click detected! clickData: {clickData}")
+        elif trigger_id.startswith("modal-rio-table"):
+            print(f"❌ DEBUG: Modal close triggered")
+            return False, None, "", ""
+    
+    # Si se hace click en un punto del timeline, mostrar el modal con la tabla
+    if clickData and graph_type == "timeline":
         point_data = clickData["points"][0]
+        print(f"🔍 DEBUG: point_data extraído: {point_data}")
+        
         df = pd.DataFrame(region_data) if region_data else pd.DataFrame()
+        print(f"📊 DEBUG: region_data recibido: {type(region_data)}, length: {len(region_data) if region_data else 'None'}")
+        print(f"📈 DEBUG: DataFrame creado - shape: {df.shape}, columns: {df.columns.tolist() if not df.empty else 'DataFrame vacío'}")
         
         if df.empty:
+            print(f"❌ DEBUG: DataFrame está vacío - retornando mensaje de error")
             return False, None, "Sin datos", "No hay información disponible para mostrar."
-            
-        # Verificar si es un gráfico con datos agrupados por región (series temporales) 
-        # o por río individual (gráfico de barras convertido a líneas)
         
-        # Caso 1: Si hay 'legendgroup' o 'customdata', es un gráfico por región (series temporales)
-        if ('legendgroup' in point_data or 'customdata' in point_data) and 'Region' in df.columns:
-            # Gráfico de líneas por región - obtener región del legendgroup o customdata
-            if 'legendgroup' in point_data:
-                selected_region = point_data['legendgroup']
-            elif 'customdata' in point_data:
-                selected_region = point_data['customdata']
-            else:
-                return False, None, "Error de región", "No se pudo identificar la región seleccionada."
+        # Obtener la fecha clicada
+        selected_date = point_data['x']
+        total_value = point_data['y']
+        print(f"📅 DEBUG: Fecha seleccionada: {selected_date}, Total: {total_value}")
+        print(f"📅 DEBUG: Tipo de fecha seleccionada: {type(selected_date)}")
+        
+        # Ver qué fechas están disponibles en el DataFrame
+        unique_dates = df['Date'].unique()[:10]  # Primeras 10 fechas únicas
+        print(f"📆 DEBUG: Primeras fechas disponibles en DataFrame: {unique_dates}")
+        print(f"📆 DEBUG: Tipo de fechas en DataFrame: {type(df['Date'].iloc[0]) if not df.empty else 'N/A'}")
+        
+        # Filtrar datos de esa fecha específica
+        df_date = df[df['Date'] == selected_date].copy()
+        print(f"🗓️ DEBUG: Datos filtrados por fecha - shape: {df_date.shape}")
+        
+        # Si no hay datos, intentar convertir la fecha a diferentes formatos
+        if df_date.empty:
+            print(f"🔄 DEBUG: Intentando conversiones de fecha...")
+            # Intentar convertir la fecha seleccionada a datetime
+            try:
+                from datetime import datetime
+                if isinstance(selected_date, str):
+                    selected_date_dt = pd.to_datetime(selected_date)
+                    print(f"🔄 DEBUG: Fecha convertida a datetime: {selected_date_dt}")
+                    # Intentar filtrar con la fecha convertida
+                    df_date = df[df['Date'] == selected_date_dt].copy()
+                    print(f"🔄 DEBUG: Datos filtrados con fecha convertida - shape: {df_date.shape}")
+                
+                # Si aún no hay datos, intentar convertir las fechas del DataFrame
+                if df_date.empty:
+                    print(f"🔄 DEBUG: Convirtiendo fechas del DataFrame...")
+                    df['Date'] = pd.to_datetime(df['Date'])
+                    df_date = df[df['Date'] == selected_date_dt].copy()
+                    print(f"🔄 DEBUG: Datos filtrados después de conversión DF - shape: {df_date.shape}")
                     
-            # Filtrar datos de la región seleccionada
-            df_region = df[df["Region"] == selected_region].copy()
-            
-            # Crear título y descripción detallados para región
-            title = f"📊 Aportes de Caudal - Región {selected_region}"
-            total_rios = len(df_region['Name'].unique()) if 'Name' in df_region.columns else 0
-            fecha_inicio = format_date(df_region['Date'].min()) if 'Date' in df_region.columns else "N/A"
-            fecha_fin = format_date(df_region['Date'].max()) if 'Date' in df_region.columns else "N/A"
-            total_registros = len(df_region)
-            total_gwh = df_region['Value'].sum() if 'Value' in df_region.columns else 0
-            
-            description = f"Esta tabla muestra los aportes diarios de caudal agregados por fecha para la región {selected_region}. Incluye datos de {total_rios} ríos únicos desde {fecha_inicio} hasta {fecha_fin}, con un total de {total_registros} registros y {format_number(total_gwh)} GWh acumulados."
-            
-            if not df_region.empty:
-                # Agrupar por fecha para mostrar el total diario de la región
-                if 'Date' in df_region.columns and 'Value' in df_region.columns:
-                    df_display = df_region.groupby(["Date"])["Value"].sum().reset_index()
-                    df_display = df_display.sort_values("Date")
-                    df_display = df_display.rename(columns={"Date": "Fecha", "Value": "Caudal (GWh)"})
-                    # Formatear solo fechas por ahora, números después de calcular participación
-                    df_display['Fecha'] = df_display['Fecha'].apply(format_date)
-                else:
-                    df_display = df_region.head(100)  # Fallback
-                
-        # Caso 2: Si hay 'x' pero NO es series temporales, es un gráfico por río individual
-        elif 'x' in point_data:
-            # Gráfico de líneas por río individual
-            selected_rio = point_data["x"]
-            
-            # Filtrar datos del río seleccionado
-            if 'Name' in df.columns:
-                df_region = df[df["Name"] == selected_rio].copy()
-            else:
-                # Buscar por el nombre del río en cualquier columna que contenga el nombre
-                df_region = df[df.eq(selected_rio).any(axis=1)].copy()
-            
-            # Obtener la región del río seleccionado
-            if 'Region' in df_region.columns and not df_region.empty:
-                selected_region = df_region['Region'].iloc[0]
-            else:
-                # Intentar obtener la región del diccionario RIO_REGION
-                selected_region = RIO_REGION.get(selected_rio.upper(), "Región no identificada")
-            
-            # Crear título y descripción detallados para río específico
-            fecha_inicio = format_date(df_region['Date'].min()) if 'Date' in df_region.columns and not df_region.empty else "N/A"
-            fecha_fin = format_date(df_region['Date'].max()) if 'Date' in df_region.columns and not df_region.empty else "N/A"
-            total_registros = len(df_region)
-            total_gwh = df_region['Value'].sum() if 'Value' in df_region.columns and not df_region.empty else 0
-            promedio_diario = df_region['Value'].mean() if 'Value' in df_region.columns and not df_region.empty else 0
-            
-            title = f"🌊 Río {selected_rio} - Región {selected_region}"
-            description = f"Serie temporal completa del río {selected_rio} ubicado en la región {selected_region}. Período: {fecha_inicio} a {fecha_fin} ({total_registros} días). Total acumulado: {format_number(total_gwh)} GWh. Promedio diario: {format_number(promedio_diario)} GWh. Esta tabla incluye todos los registros diarios disponibles con su participación porcentual respecto al total del período."
-            
-            if not df_region.empty:
-                # Mostrar datos temporales del río
-                if 'Date' in df_region.columns and 'Value' in df_region.columns:
-                    df_display = df_region[['Date', 'Value']].sort_values("Date")
-                    df_display = df_display.rename(columns={"Date": "Fecha", "Value": "Caudal (GWh)"})
-                    # Formatear solo fechas por ahora, números después de calcular participación
-                    df_display['Fecha'] = df_display['Fecha'].apply(format_date)
-                else:
-                    df_display = df_region.head(100)  # Fallback
-            else:
-                return False, None, f"Sin datos para {selected_rio}", f"No se encontraron datos para el río {selected_rio}."
-                
-        else:
-            return False, None, "Error de selección", "No se pudo procesar la selección realizada en el gráfico."
+            except Exception as e:
+                print(f"❌ DEBUG: Error en conversión de fechas: {e}")
         
-        if 'df_display' in locals() and not df_display.empty:
-            # Calcular participación porcentual
-            total = df_display["Caudal (GWh)"].sum()
-            if total > 0:
-                df_display['Participación (%)'] = (df_display["Caudal (GWh)"] / total * 100).round(2)
-                # Ajustar para que sume exactamente 100%
-                diferencia = 100 - df_display['Participación (%)'].sum()
-                if abs(diferencia) > 0.001:
-                    idx_max = df_display['Participación (%)'].idxmax()
-                    df_display.loc[idx_max, 'Participación (%)'] += diferencia
-                    df_display['Participación (%)'] = df_display['Participación (%)'].round(2)
-            else:
-                df_display['Participación (%)'] = 0
-            
-            # Ahora formatear los números después de calcular participación
-            df_display['Caudal (GWh)'] = df_display['Caudal (GWh)'].apply(format_number)
-                
-            # Agregar fila total
-            total_row = {}
-            for col in df_display.columns:
-                if col == df_display.columns[0]:  # Primera columna (Fecha)
-                    total_row[col] = 'TOTAL'
-                elif col == "Caudal (GWh)":
-                    total_row[col] = format_number(total)
-                elif col == 'Participación (%)':
-                    total_row[col] = '100.0%'
-                else:
-                    total_row[col] = ''
-            
-            data_with_total = df_display.to_dict('records') + [total_row]
-            
-            # Identificar la columna para el estilo TOTAL
-            total_column = df_display.columns[0]
-            
-            table = dash_table.DataTable(
-                data=data_with_total,
-                columns=[{"name": i, "id": i} for i in df_display.columns],
-                style_cell={'textAlign': 'left', 'padding': '6px', 'fontFamily': 'Arial', 'fontSize': 14},
-                style_header={'backgroundColor': '#e3e3e3', 'fontWeight': 'bold'},
-                style_data={'backgroundColor': '#f8f8f8'},
-                style_data_conditional=[
-                    {
-                        'if': {'filter_query': f'{{{total_column}}} = "TOTAL"'},
-                        'backgroundColor': '#007bff',
-                        'color': 'white',
-                        'fontWeight': 'bold'
-                    }
-                ],
-                page_action="none",
-                export_format="xlsx",
-                export_headers="display"
-            )
-            return True, table, title, description
+        print(f"🔍 DEBUG: Primeras filas de df_date: {df_date.head(3).to_dict() if not df_date.empty else 'No hay datos'}")
+        
+        if df_date.empty:
+            print(f"❌ DEBUG: No hay datos para la fecha {selected_date}")
+            return False, None, f"Sin datos para {selected_date}", f"No se encontraron datos para la fecha {selected_date}."
+        
+        # Agrupar por región para esa fecha
+        region_summary = df_date.groupby('Region')['Value'].sum().reset_index()
+        region_summary = region_summary.sort_values('Value', ascending=False)
+        region_summary = region_summary.rename(columns={'Region': 'Región', 'Value': 'Caudal (GWh)'})
+        print(f"📊 DEBUG: region_summary creado - shape: {region_summary.shape}")
+        print(f"📈 DEBUG: region_summary contenido: {region_summary.to_dict() if not region_summary.empty else 'Vacío'}")
+        
+        # Calcular participación porcentual
+        total = region_summary['Caudal (GWh)'].sum()
+        print(f"💰 DEBUG: Total calculado: {total}")
+        
+        if total > 0:
+            region_summary['Participación (%)'] = (region_summary['Caudal (GWh)'] / total * 100).round(2)
+            # Ajustar para que sume exactamente 100%
+            diferencia = 100 - region_summary['Participación (%)'].sum()
+            if abs(diferencia) > 0.001:
+                idx_max = region_summary['Participación (%)'].idxmax()
+                region_summary.loc[idx_max, 'Participación (%)'] += diferencia
+                region_summary['Participación (%)'] = region_summary['Participación (%)'].round(2)
         else:
-            return False, None, "Sin datos procesables", "Los datos seleccionados no se pudieron procesar correctamente."
+            region_summary['Participación (%)'] = 0
+        
+        # Formatear números
+        region_summary['Caudal (GWh)'] = region_summary['Caudal (GWh)'].apply(format_number)
+        
+        # Agregar fila total
+        total_row = {
+            'Región': 'TOTAL',
+            'Caudal (GWh)': format_number(total),
+            'Participación (%)': '100.0%'
+        }
+        
+        data_with_total = region_summary.to_dict('records') + [total_row]
+        
+        # Crear tabla
+        table = dash_table.DataTable(
+            data=data_with_total,
+            columns=[
+                {"name": "Región", "id": "Región"},
+                {"name": "Caudal (GWh)", "id": "Caudal (GWh)"},
+                {"name": "Participación (%)", "id": "Participación (%)"}
+            ],
+            style_cell={'textAlign': 'left', 'padding': '8px', 'fontFamily': 'Inter, Arial', 'fontSize': 14},
+            style_header={'backgroundColor': '#000000', 'color': 'white', 'fontWeight': 'bold'},
+            style_data={'backgroundColor': '#f8f9fa'},
+            style_data_conditional=[
+                {
+                    'if': {'filter_query': '{Región} = "TOTAL"'},
+                    'backgroundColor': '#000000',
+                    'color': 'white',
+                    'fontWeight': 'bold'
+                }
+            ],
+            page_action="none",
+            export_format="xlsx",
+            export_headers="display"
+        )
+        
+        # Crear título y descripción
+        formatted_date = format_date(selected_date)
+        total_regions = len(region_summary) - 1 if len(region_summary) > 0 else 0
+        title = f"📅 Detalles del {formatted_date} - Total Nacional: {format_number(total_value)} GWh"
+        description = f"Detalle por región hidrológica para el día {formatted_date}. Se muestran los aportes de caudal de {total_regions} regiones que registraron actividad en esta fecha, con su respectiva participación porcentual sobre el total nacional de {format_number(total_value)} GWh."
+        
+        print(f"✅ DEBUG: Título: {title}")
+        print(f"✅ DEBUG: Descripción: {description}")
+        print(f"✅ DEBUG: Retornando modal abierto con tabla de {len(data_with_total)} filas")
+        
+        return True, table, title, description
     
     # Si se cierra el modal
     elif ctx.triggered and ctx.triggered[0]["prop_id"].startswith("modal-rio-table"):
         return False, None, "", ""
     
     # Por defecto, modal cerrado
+    print(f"⚠️ DEBUG: No se detectó ningún click válido - modal cerrado por defecto")
     return False, None, "", ""
 
 def create_stats_summary(data):
